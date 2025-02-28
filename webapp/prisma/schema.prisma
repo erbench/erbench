@@ -27,9 +27,8 @@ model Dataset {
 }
 
 enum Scenario {
-  filter
-  progress
-  verify
+  filtering
+  matching
 }
 
 enum Param {
@@ -45,7 +44,8 @@ model Algorithm {
   params    Param[]
   createdAt DateTime   @default(now())
 
-  jobs Job[]
+  filteringJobs Job[] @relation("filteringAlgo")
+  matchingJobs  Job[] @relation("matchingAlgo")
 }
 
 enum Status {
@@ -56,20 +56,21 @@ enum Status {
 }
 
 model Job {
-  id          String   @id @default(cuid())
-  status      Status   @default(pending)
-  datasetId   Int
-  algorithmId Int
-  scenario    Scenario
-  recall      Float?
-  epochs      Int?
-  notifyEmail String?
-  createdAt   DateTime @default(now())
+  id              String   @id @default(cuid())
+  status          Status   @default(pending)
+  datasetId       Int
+  filteringAlgoId Int
+  filteringParams Json?
+  matchingAlgoId  Int
+  matchingParams  Json?
+  notifyEmail     String?
+  createdAt       DateTime @default(now())
 
-  algorithm   Algorithm     @relation(fields: [algorithmId], references: [id])
-  dataset     Dataset       @relation(fields: [datasetId], references: [id])
-  result      Result?
-  predictions Predictions[]
+  filteringAlgo Algorithm     @relation("filteringAlgo", fields: [filteringAlgoId], references: [id])
+  matchingAlgo  Algorithm     @relation("matchingAlgo", fields: [matchingAlgoId], references: [id])
+  dataset       Dataset       @relation(fields: [datasetId], references: [id])
+  result        Result?
+  predictions   Predictions[]
 }
 
 // the model should share id with Jobs

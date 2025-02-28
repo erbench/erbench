@@ -6,6 +6,16 @@ import {hashElement} from "folder-hash";
 const prisma = new PrismaClient()
 
 const load = async () => {
+  // Remove algorithms not in the list
+  const algorithmCodes = algorithms.map(algo => algo.code);
+  await prisma.algorithm.deleteMany({
+    where: {
+      code: {
+        notIn: algorithmCodes,
+      },
+    },
+  });
+
   for (const algo of algorithms) {
     const a = await prisma.algorithm.upsert({
       where: {code: algo.code},

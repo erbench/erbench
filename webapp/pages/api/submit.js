@@ -12,14 +12,16 @@ export default async function handler(req, res) {
       const existingResults = await prisma.job.findMany({
         where: {
           status: 'completed',
-          scenario: req.body.scenario,
           datasetId: req.body.datasetId,
-          algorithmId: req.body.algorithmId,
-          recall: req.body.recall,
-          epochs: req.body.epochs,
+          filteringAlgoId: req.body.filteringAlgoId,
+          matchingAlgoId: req.body.matchingAlgoId,
+          // Use Prisma's JSON query operators
+          filteringParams: req.body.filteringParams ? { equals: req.body.filteringParams } : null,
+          matchingParams: req.body.matchingParams ? { equals: req.body.matchingParams } : null,
         },
         include: {
-          algorithm: true,
+          filteringAlgo: true,
+          matchingAlgo: true,
           dataset: true,
           result: true,
         },
@@ -32,11 +34,11 @@ export default async function handler(req, res) {
 
     const newJob = await prisma.job.create({
       data: {
-        scenario: req.body.scenario,
         datasetId: req.body.datasetId,
-        algorithmId: req.body.algorithmId,
-        recall: req.body.recall,
-        epochs: req.body.epochs,
+        filteringAlgoId: req.body.filteringAlgoId,
+        filteringParams: req.body.filteringParams,
+        matchingAlgoId: req.body.matchingAlgoId,
+        matchingParams: req.body.matchingParams,
         notifyEmail: req.body.notifyEmail,
       }
     });

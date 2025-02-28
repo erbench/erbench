@@ -26,7 +26,8 @@ export const getServerSideProps = async ({query}) => {
       id: id,
     },
     include: {
-      algorithm: true,
+      filteringAlgo: true,
+      matchingAlgo: true,
       dataset: true,
       result: true,
       predictions: true,
@@ -61,15 +62,15 @@ export default function ViewJob({job}) {
               <span>{job.dataset.name}</span>
             </div>
             <div className="flex justify-content-between">
-              <span className="font-medium">Algorithm:</span>
-              <span>{job.algorithm.name}</span>
+              <span className="font-medium">Filtering Algorithm:</span>
+              <span>{job.filteringAlgo.name}</span>
             </div>
             <div className="flex justify-content-between">
-              <span className="font-medium">Scenario:</span>
-              <span>{capitalize(job.scenario)}</span>
+              <span className="font-medium">Matching Algorithm:</span>
+              <span>{job.matchingAlgo.name}</span>
             </div>
             <div className="flex justify-content-between">
-              <span className="font-medium">Created At:</span>
+              <span className="font-medium">Created:</span>
               <span>{new Date(job.createdAt).toISOString()}</span>
             </div>
             {job.result && (
@@ -82,16 +83,28 @@ export default function ViewJob({job}) {
         </div>
         <div className="col-6">
           <div className="flex flex-column gap-2">
-            {job.recall !== null && (
+            {job.filteringParams.recall && (
               <div className="flex justify-content-between">
-                <span className="font-medium">Recall:</span>
-                <span>{job.recall}</span>
+                <span className="font-medium">Filtering Recall:</span>
+                <span>{job.filteringParams.recall}</span>
               </div>
             )}
-            {job.epochs !== null && (
+            {job.filteringParams.epochs && (
               <div className="flex justify-content-between">
-                <span className="font-medium">Epochs:</span>
-                <span>{job.epochs}</span>
+                <span className="font-medium">Filtering Epochs:</span>
+                <span>{job.filteringParams.epochs}</span>
+              </div>
+            )}
+            {job.matchingParams.recall && (
+              <div className="flex justify-content-between">
+                <span className="font-medium">Matching Recall:</span>
+                <span>{job.matchingParams.recall}</span>
+              </div>
+            )}
+            {job.matchingParams.epochs && (
+              <div className="flex justify-content-between">
+                <span className="font-medium">Matching Epochs:</span>
+                <span>{job.matchingParams.epochs}</span>
               </div>
             )}
             {job.notifyEmail && (

@@ -1,10 +1,10 @@
-import React, {useState} from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import {DataTable} from 'primereact/datatable';
 import {Column} from 'primereact/column';
 
 import prisma from "../../prisma/client";
-import {ProgressBar} from "primereact/progressbar";
+import {renderParams, renderStatusTemplate} from "../../utils/jobUtils";
 
 export const getServerSideProps = async () => {
   const jobs = await prisma.job.findMany({
@@ -13,13 +13,15 @@ export const getServerSideProps = async () => {
       createdAt: 'desc'
     },
     include: {
-      algorithm: true,
+      filteringAlgo: true,
+      matchingAlgo: true,
       dataset: true,
     }
   });
 
   return {
     props: {
+      useContainer: false,
       jobs: JSON.parse(JSON.stringify(jobs)),
     }
   }
@@ -34,39 +36,19 @@ export default function ListJobs({jobs}) {
     </div>
   }
 
-  const statusBodyTemplate = (rowData) => {
-    let classNames = '';
-    let progress = 0;
-    if (rowData.status === 'completed') {
-      progress = 100;
-      classNames = 'p-progressbar-success';
-    } else if (rowData.status === 'failed') {
-      progress = 100;
-      classNames = 'p-progressbar-failed';
-    } else if (rowData.status === 'running') {
-      progress = 30;
-    }
-
-    return (
-      <React.Fragment>
-        <ProgressBar value={progress} showValue={false} className={classNames}/>
-      </React.Fragment>
-    );
-  };
-
   return <div>
     <h1 className="text-4xl font-bold">Jobs list</h1>
 
     <div className="card">
       <DataTable value={jobs} onRowClick={e => router.push(`/jobs/${e.data.id}`)} stripedRows size="small" rowClassName="p-selectable-row">
         <Column field="id" header="Job ID" body={(rowData) => <a href={`/jobs/${rowData.id}`}>{rowData.id}</a>}></Column>
-        <Column field="status" header="Status" body={statusBodyTemplate}></Column>
+        <Column field="status" header="Status" body={renderStatusTemplate}></Column>
         <Column field="dataset.name" header="Dataset"></Column>
-        <Column field="algorithm.name" header="Algorithm"></Column>
-        <Column field="scenario" header="Scenario"></Column>
-        <Column field="recall" header="Recall"></Column>
-        <Column field="epochs" header="Epochs"></Column>
-        <Column field="createdAt" header="Created At"></Column>
+        <Column field="filteringAlgo.name" header="Filtering Algorithm"></Column>
+        <Column body={(row) => renderParams(row.filteringParams)} header="Filtering Params"></Column>
+        <Column field="matchingAlgo.name" header="Matching Algorithm"></Column>
+        <Column body={(row) => renderParams(row.matchingParams)} header="Matching Params"></Column>
+        <Column field="createdAt" header="Created"></Column>
       </DataTable>
     </div>
   </div>

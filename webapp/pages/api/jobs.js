@@ -8,7 +8,8 @@ export default async function handler(req, res) {
       status: 'pending'
     },
     include: {
-      algorithm: true,
+      filteringAlgo: true,
+      matchingAlgo: true,
       dataset: true
     }
   });

@@ -7,16 +7,19 @@ from tqdm import tqdm, trange
 
 from logging_customized import setup_logging
 from model import save_model
+from prediction import predict
+import time
 
 setup_logging()
 
 
 def train(device,
           train_dataloader,
+          eval_dataloader,
+          test_dataloader,
           model,
           optimizer,
           scheduler,
-          evaluation,
           num_epocs,
           max_grad_norm,
           save_model_after_epoch,
@@ -30,12 +33,13 @@ def train(device,
     tr_loss, logging_loss = 0.0, 0.0
     model.zero_grad()
 
-    # we are interested in 0 shot learning, therefore we already evaluate before training.
-    # eval_results = evaluation.evaluate(model, device, -1)
-    # for key, value in eval_results.items():
-    #    tb_writer.add_scalar('eval_{}'.format(key), value, global_step)
-
+    results = []
+    best_epoch = []
+    best_f1 = 0
+    include_token_type_ids = (model_type=='bert')
+    t_start = time.process_time()
     for epoch in trange(int(num_epocs), desc="Epoch"):
+        t_batch = time.process_time()
         for step, batch in enumerate(tqdm(train_dataloader, desc="Iteration")):
             model.train()
 
@@ -65,6 +69,20 @@ def train(device,
             tb_writer.add_scalar('lr', scheduler.get_lr()[0], global_step)
             tb_writer.add_scalar('loss', (tr_loss - logging_loss), global_step)
             logging_loss = tr_loss
+        t_train = time.process_time()
+        _, f1, _, _, _, _  = predict(model, device, eval_dataloader, include_token_type_ids)
+        t_eval = time.process_time()
+        _, _, _, prfs, _, _ = predict(model, device, test_dataloader, include_token_type_ids)
+        t_test = time.process_time()
+        test_f1 = prfs[2][1]
+        test_p = prfs[0][1]
+        test_r = prfs[1][1]
+        curr_results = [epoch, test_f1, test_p, test_r, t_train-t_batch, t_eval-t_train, t_test-t_eval]
+        results += [curr_results]
+
+        if f1 > best_f1:
+            best_epoch = curr_results
+            best_f1 = f1
 
         # eval_results = evaluation.evaluate(model, device, epoch)
         # for key, value in eval_results.items():
@@ -73,4 +91,6 @@ def train(device,
         if save_model_after_epoch:
             save_model(model, experiment_name, output_dir, epoch=epoch)
 
+    results += [best_epoch]
     tb_writer.close()
+    return results

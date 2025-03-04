@@ -28,15 +28,17 @@ def join_columns(table, columns_to_join=None, separator=' ', prefixes=['tableA_'
 
 def transform_input(source_dir, columns_to_join=None, separator=' ', prefixes=['tableA_', 'tableB_']):
     train_df = pd.read_csv(os.path.join(source_dir, 'train.csv'), encoding_errors='replace')
+    valid_df = pd.read_csv(os.path.join(source_dir, 'valid.csv'), encoding_errors='replace')
     test_df = pd.read_csv(os.path.join(source_dir, 'test.csv'), encoding_errors='replace')
 
     train = join_columns(train_df, columns_to_join, separator, prefixes)
+    valid = join_columns(valid_df, columns_to_join, separator, prefixes)
     test = join_columns(test_df, columns_to_join, separator, prefixes)
 
-    return train, test
+    return train, valid, test
 
 
-def transform_output(predictions_df, logits, test_table, train_time, eval_time, dest_dir):
+def transform_output(predictions_df, logits, test_table, results_per_epoch, train_time, eval_time, dest_dir):
     """
     Transform the output of the method into two common format files, which are stored in the destination directory.
     metrics.csv: f1, precision, recall, train_time, eval_time (1 row, 5 columns, with header)
@@ -75,6 +77,10 @@ def transform_output(predictions_df, logits, test_table, train_time, eval_time, 
         'train_time': [train_time],
         'eval_time': [eval_time],
     }).to_csv(os.path.join(dest_dir, 'metrics.csv'), index=False)
+
+    pd.DataFrame(results_per_epoch,
+                 columns=['epoch', 'f1', 'precision', 'recall', 'train_time', 'valid_time', 'test_time']
+                 ).to_csv(os.path.join(dest_dir, 'metrics_per_epoch.csv'), index=False)
 
     return None
 

@@ -3,9 +3,9 @@ html {
 }
 
 body {
-    margin: 0px;
+    margin: 0;
+    padding: 3rem;
     height: 100%;
-    padding: 2rem;
     overflow-x: hidden;
     overflow-y: auto;
     background-color: var(--surface-ground);

@@ -1,0 +1,33 @@
+name: Deploy Webapp
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'webapp/**'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual deployment'
+        required: false
+        default: 'Manual trigger'
+
+jobs:
+  deploy:
+    name: Deploy Webapp
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          proxy_host: ${{ secrets.DEPLOY_JUMP_HOST }}
+          proxy_username: ${{ secrets.DEPLOY_USER }}
+          proxy_key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            cd ~/erbench/webapp/
+            git pull
+            npm ci
+            npm run build
+            systemctl restart erbench --user

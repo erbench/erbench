@@ -10,6 +10,7 @@ import {InputText} from "primereact/inputtext";
 
 import prisma from "../prisma/client";
 import {Checkbox} from "primereact/checkbox";
+import {renderParams} from "../utils/jobUtils";
 
 export const getServerSideProps = async ({req}) => {
   const algorithms = await prisma.algorithm.findMany();
@@ -25,19 +26,16 @@ export const getServerSideProps = async ({req}) => {
 
 export default function Home({datasets, algorithms}) {
   const router = useRouter();
-
-  const scenarios = [
-    {code: 'filter', name: 'Filtering'},
-    {code: 'verify', name: 'Verification'},
-    {code: 'progress', name: 'Progressive'},
-  ];
+  const filteringRecallOptions = [0.65, 0.75, 0.85];
 
   // fields
-  const [selectedScenario, setSelectedScenario] = useState(scenarios[0]);
   const [selectedDataset, setSelectedDataset] = useState(datasets[0]);
-  const [selectedAlgorithm, setSelectedAlgorithm] = useState(algorithms.find(algo => algo.scenarios.includes(selectedScenario.code)));
-  const [recall, setRecall] = useState(0.85);
-  const [epochs, setEpochs] = useState(10);
+  const [selectedFilteringAlgo, setSelectedFilteringAlgo] = useState(algorithms.find(algo => algo.scenarios.includes('filtering')));
+  const [filteringRecall, setFilteringRecall] = useState(filteringRecallOptions[0]);
+  const [filteringEpochs, setFilteringEpochs] = useState(5);
+  const [selectedMatchingAlgo, setSelectedMatchingAlgo] = useState(algorithms.find(algo => algo.scenarios.includes('matching')));
+  const [matchingRecall, setMatchingRecall] = useState(0.85);
+  const [matchingEpochs, setMatchingEpochs] = useState(10);
   const [email, setEmail] = useState('');
 
   // state
@@ -52,6 +50,22 @@ export default function Home({datasets, algorithms}) {
   const onSubmit = (e) => {
     setDisabled(true);
 
+    let filteringParams = {};
+    if (selectedFilteringAlgo.params.includes('recall')) {
+      filteringParams.recall = filteringRecall;
+    }
+    if (selectedFilteringAlgo.params.includes('epochs')) {
+      filteringParams.epochs = filteringEpochs;
+    }
+
+    let matchingParams = {};
+    if (selectedMatchingAlgo.params.includes('recall')) {
+      matchingParams.recall = matchingRecall;
+    }
+    if (selectedMatchingAlgo.params.includes('epochs')) {
+      matchingParams.epochs = matchingEpochs;
+    }
+
     fetch('/api/submit', {
       method: 'POST',
       headers: {
@@ -59,11 +73,11 @@ export default function Home({datasets, algorithms}) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        scenario: selectedScenario.code,
         datasetId: selectedDataset.id,
-        algorithmId: selectedAlgorithm.id,
-        recall: recall,
-        epochs: epochs,
+        filteringAlgoId: selectedFilteringAlgo.id,
+        filteringParams: filteringParams,
+        matchingAlgoId: selectedMatchingAlgo.id,
+        matchingParams: matchingParams,
         notifyEmail: email,
       })
     })
@@ -87,43 +101,54 @@ export default function Home({datasets, algorithms}) {
   return <div>
     <h1 className="text-4xl font-bold">No-code Benchmarking of Entity Resolution</h1>
 
-    <h3 className="mb-2">Select a scenario</h3>
-    <div className="flex flex-wrap gap-3">
-      {scenarios.map((scenario) => {
-        return (
-          <div key={scenario.code} className="flex align-items-center">
-            <RadioButton inputId={scenario.code} name="scenario" value={scenario}
-                         onChange={(e) => setSelectedScenario(e.value)}
-                         checked={selectedScenario.code === scenario.code} disabled={formDisabled}/>
-            <label htmlFor={scenario.code} className="ml-2">{scenario.name}</label>
-          </div>
-        );
-      })}
-    </div>
-
     <div className="grid mt-4">
       <div className="col">
         <h2>Dataset</h2>
 
         <div className="flex flex-column gap-2 mb-3">
           <label htmlFor="dataset">Predefined dataset</label>
-          <Dropdown id="dataset" aria-describedby="dataset-help"
+          <Dropdown id="dataset" aria-describedby="dataset-help" className="w-full"
                     value={selectedDataset} onChange={(e) => setSelectedDataset(e.value)}
                     disabled={formDisabled}
                     options={datasets} optionLabel="name"
-                    placeholder="Select a dataset" className="w-full"/>
+                    placeholder="Select a dataset"/>
           <small id="dataset-help">You can select one of the common dataset, or upload your own
             below</small>
         </div>
 
-        {/*<div className="flex flex-column gap-2 mb-3">
-          <label htmlFor="epochs">Epochs</label>
-          <InputNumber id="epochs" aria-describedby="epochs-help" className="w-full"
-                       value={epochs} onValueChange={(e) => setEpochs(e.value)}
-                       disabled={formDisabled}
-                       minFractionDigits={0} min={5} max={50} step={5} showButtons/>
-          <small id="epochs-help">A numbers of epochs to run</small>
-        </div>*/}
+        <div className="flex flex-column gap-2 mb-3">
+          <label htmlFor="filtering-algorithm">Filtering Algorithm</label>
+          <Dropdown id="filtering-algorithm" aria-describedby="filtering-algorithm-help" className="w-full"
+                    value={selectedFilteringAlgo} onChange={(e) => setSelectedFilteringAlgo(e.value)}
+                    disabled={formDisabled}
+                    options={algorithms.filter(algo => algo.scenarios.includes('filtering'))}
+                    optionLabel="name"
+                    placeholder="Select an algorithm"/>
+          <small id="filtering-algorithm-help">Which algorithm to use for filtering the dataset</small>
+        </div>
+
+        <div className={(selectedFilteringAlgo != null && selectedFilteringAlgo.params.includes('recall') ? null : "hidden")}>
+          <div className="flex flex-column gap-2 mb-3">
+            <label htmlFor="filtering-recall">Filtering Recall</label>
+            <Dropdown id="filtering-recall" aria-describedby="filtering-recall-help" className="w-full"
+                      value={filteringRecall} onChange={(e) => setFilteringRecall(e.value)}
+                      disabled={formDisabled}
+                      options={filteringRecallOptions}
+                      placeholder="Select an algorithm"/>
+            <small id="filtering-recall-help">A recall value for filtering</small>
+          </div>
+        </div>
+
+        <div className={(selectedFilteringAlgo != null && selectedFilteringAlgo.params.includes('epochs') ? null : "hidden")}>
+          <div className="flex flex-column gap-2 mb-3">
+            <label htmlFor="filtering-epochs">Filtering Epochs</label>
+            <InputNumber id="filtering-epochs" aria-describedby="filtering-epochs-help" className="w-full"
+                         value={filteringEpochs} onValueChange={(e) => setFilteringEpochs(e.value)}
+                         disabled={formDisabled}
+                         minFractionDigits={0} min={5} max={50} step={5} showButtons/>
+            <small id="filtering-epochs-help">A numbers of epochs to run for filtering</small>
+          </div>
+        </div>
 
         {/*<div className="flex flex-column gap-2 mb-3">
           <label htmlFor="dataset_file">Own dataset</label>
@@ -148,36 +173,36 @@ export default function Home({datasets, algorithms}) {
         <h2>Model</h2>
 
         <div className="flex flex-column gap-2 mb-3">
-          <label htmlFor="algorithm">Algorithm</label>
-          <Dropdown id="algorithm" aria-describedby="algorithm-help"
-                    value={selectedAlgorithm} onChange={(e) => setSelectedAlgorithm(e.value)}
+          <label htmlFor="matching-algorithm">Matching Algorithm</label>
+          <Dropdown id="matching-algorithm" aria-describedby="matching-algorithm-help" className="w-full"
+                    value={selectedMatchingAlgo} onChange={(e) => setSelectedMatchingAlgo(e.value)}
                     disabled={formDisabled}
-                    options={algorithms.filter(algo => algo.scenarios.includes(selectedScenario.code))}
+                    options={algorithms.filter(algo => algo.scenarios.includes('matching'))}
                     optionLabel="name"
-                    placeholder="Select a model" className="w-full"/>
-          <small id="algorithm-help">Which algorithm / model to use</small>
+                    placeholder="Select a model"/>
+          <small id="matching-algorithm-help">Which algorithm / model to use</small>
         </div>
 
-        <div className={(selectedAlgorithm != null && selectedAlgorithm.params.includes('recall') ? null : "hidden")}>
+        <div className={(selectedMatchingAlgo != null && selectedMatchingAlgo.params.includes('recall') ? null : "hidden")}>
           <div className="flex flex-column gap-2 mb-3">
-            <label htmlFor="recall">Recall</label>
-            <InputNumber id="recall" aria-describedby="recall-help" className="w-full"
-                         value={recall} onValueChange={(e) => setRecall(e.value)}
+            <label htmlFor="matching-recall">Matching Recall</label>
+            <InputNumber id="matching-recall" aria-describedby="matching-recall-help" className="w-full"
+                         value={matchingRecall} onValueChange={(e) => setMatchingRecall(e.value)}
                          disabled={formDisabled}
                          minFractionDigits={2} min={0} max={1} step={0.05} mode="decimal"
                          showButtons/>
-            <small id="recall-help">A recall value between 0 and 1</small>
+            <small id="matching-recall-help">A recall value between 0 and 1</small>
           </div>
         </div>
 
-        <div className={(selectedAlgorithm != null && selectedAlgorithm.params.includes('epochs') ? null : "hidden")}>
+        <div className={(selectedMatchingAlgo != null && selectedMatchingAlgo.params.includes('epochs') ? null : "hidden")}>
           <div className="flex flex-column gap-2 mb-3">
-            <label htmlFor="epochs">Epochs</label>
-            <InputNumber id="epochs" aria-describedby="epochs-help" className="w-full"
-                         value={epochs} onValueChange={(e) => setEpochs(e.value)}
+            <label htmlFor="matching-epochs">Matching Epochs</label>
+            <InputNumber id="matching-epochs" aria-describedby="matching-epochs-help" className="w-full"
+                         value={matchingEpochs} onValueChange={(e) => setMatchingEpochs(e.value)}
                          disabled={formDisabled}
                          minFractionDigits={0} min={5} max={50} step={5} showButtons/>
-            <small id="epochs-help">A numbers of epochs to run</small>
+            <small id="matching-epochs-help">A numbers of epochs to run</small>
           </div>
         </div>
       </div>
@@ -215,11 +240,11 @@ export default function Home({datasets, algorithms}) {
           <DataTable value={results} onRowClick={e => router.push(`/jobs/${e.data.id}`)} stripedRows size="small" rowClassName="p-selectable-row">
             <Column field="id" header="Job ID" body={(rowData) => <a href={`/jobs/${rowData.id}`}>{rowData.id}</a>}></Column>
             <Column field="dataset.name" header="Dataset"></Column>
-            <Column field="algorithm.name" header="Algorithm"></Column>
-            <Column field="scenario" header="Scenario"></Column>
-            <Column field="recall" header="Recall"></Column>
-            <Column field="epochs" header="Epochs"></Column>
-            <Column field="createdAt" header="Created At"></Column>
+            <Column field="filteringAlgo.name" header="Filtering Algorithm"></Column>
+            <Column body={(row) => renderParams(row.filteringParams)} header="Filtering Params"></Column>
+            <Column field="matchingAlgo.name" header="Matching Algorithm"></Column>
+            <Column body={(row) => renderParams(row.matchingParams)} header="Matching Params"></Column>
+            <Column field="createdAt" header="Created"></Column>
           </DataTable>
         </div>
       </div>

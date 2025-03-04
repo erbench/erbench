@@ -19,7 +19,7 @@ From: python:3.9
     pip install --no-cache-dir -r requirements.txt
     python -m nltk.downloader stopwords
     python -m nltk.downloader punkt_tab
-    mv /root/nltk_data /opt/conda/lib/nltk_data
+
 
 %runscript
     exec python -u /srv/splitter.py  "$@"

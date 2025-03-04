@@ -34,24 +34,15 @@ def generate_candidates(tableA_df, tableB_df, matches_df, settings):
     for col in ac_tableB:
         tableB_df[col] = tableB_df[col].str.replace('\t', ' ')
 
-    block_A = tableA_df[ac_tableA].copy()
-    block_B = tableB_df[ac_tableB].copy()
-    block_A.reset_index(drop=True, inplace=True)
-    block_B.reset_index(drop=True, inplace=True)
-    block_A['id'] = list(range(block_A.shape[0]))
-    block_B['id'] = list(range(block_B.shape[0]))
-    print(block_A['id'].max(), block_B['id'].max())
+    block_A = tableA_df.copy()
+    block_B = tableB_df.copy()
+    print(block_A['id'], block_B['id'])
 
     if settings['clean']:
         stop_words = set(stopwords.words('english'))
         snowball_stemmer = SnowballStemmer('english')
         block_A[ac_tableA] = block_A[ac_tableA].map(lambda x: clean_entry(x, snowball_stemmer, stop_words))
         block_B[ac_tableB] = block_B[ac_tableB].map(lambda x: clean_entry(x, snowball_stemmer, stop_words))
-
-    print(matches_df.max())
-
-    print(block_B)
-    print(block_B.columns)
 
     if settings['reverse']:
         data = Data(
@@ -82,18 +73,12 @@ def generate_candidates(tableA_df, tableB_df, matches_df, settings):
     candidates = join.fit(data)
     candidates_df = join.export_to_df(candidates)
     candidates_df = candidates_df.astype(int)
-    candidates_df.to_csv('test_candidates', index=False)
-    print(candidates_df.max())
     if settings['reverse']:
-        candidates_df.columns = ['tableA_id', 'tableB_id']
+        candidates_df.columns = ['tableB_id', 'tableA_id']
     else:
-        #candidates_df.columns = ['tableB_id', 'tableA_id']
-        candidates_df['tableA_id'] = block_A['id'].to_numpy()[candidates_df['id1'].to_numpy()]
-        candidates_df['tableB_id'] = block_B['id'].to_numpy()[candidates_df['id2'].to_numpy()]
-    print(candidates_df)
+        candidates_df.columns = ['tableA_id', 'tableB_id']
 
-
-    #Alternative Way for pairs_df (only keeps those true pairs, which were found in blocking)
+    #only keeps those true pairs, which were found in blocking
     golden_set = set(matches_df.itertuples(index=False, name=None))
     pairs_df = candidates_df
     pairs_df['label'] = pairs_df.apply(lambda x: (x['tableA_id'], x['tableB_id']) in golden_set, axis=1).astype(int)

@@ -10,6 +10,7 @@ node_modules
 test
 embedding
 db_split
+kj_split
 slurm*.out
 
 /apptainer

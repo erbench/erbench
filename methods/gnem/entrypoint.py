@@ -18,6 +18,8 @@ from GCN import gcn
 from logger import set_logger
 from torch.utils.tensorboard import SummaryWriter
 import torch.nn as nn
+import random
+import numpy as np
 
 parser = argparse.ArgumentParser(description='Benchmark a dataset with a method')
 parser.add_argument('input', type=pathtype.Path(readable=True), nargs='?', default='../../datasets/d2_abt_buy',
@@ -26,11 +28,17 @@ parser.add_argument('output', type=str, nargs='?', default='../../output/gnem',
                     help='Output directory to store the output')
 parser.add_argument('-e', '--epochs', type=int, nargs='?', default=1,
                     help='Number of epochs to train the model')
+parser.add_argument('-s', '--seed', type=int, nargs='?', default=random.randint(0, 4294967295),
+                    help='The random state used to initialize the algorithms and split dataset')
 
 args = parser.parse_args()
 os.makedirs(args.output, exist_ok=True)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+torch.manual_seed(args.seed)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(args.seed)
+np.random.seed(args.seed)
 
 print("Hi, I'm GNEM entrypoint!")
 print("Input taken from: ", args.input)
@@ -74,7 +82,7 @@ train_iter = DataLoader(train_dataset, batch_size=batch_size, collate_fn=collate
 val_iter = DataLoader(val_dataset, batch_size=batch_size, collate_fn=collate_fn, shuffle=False)
 test_iter = DataLoader(test_dataset, batch_size=batch_size, collate_fn=collate_fn, shuffle=False)
 
-embedmodel = EmbedModel(useful_field_num=useful_field_num,device=device)
+embedmodel = EmbedModel(useful_field_num=useful_field_num, lm = 'bert', device=device)
 
 gcn_layer = 1
 dropout = 0.0
@@ -117,10 +125,11 @@ model = model.to(embedmodel.device)
 pos = 2.0 * pos_neg_ratio / (1.0 + pos_neg_ratio)
 neg = 2.0 / (1.0 + pos_neg_ratio)
 criterion = nn.CrossEntropyLoss(weight=torch.Tensor([neg, pos])).to(embedmodel.device)
+log_freq = len(train_iter)//10
 
 start_time = time.process_time()
 f1s, ps, rs, score_dicts, time_m, res_per_epoch = train(train_iter, args.output, logger, tf_logger, model, embedmodel, opt, criterion, args.epochs, test_iter=test_iter, val_iter=val_iter,
-      scheduler=scheduler, log_freq=5, start_epoch=start_epoch, start_f1=start_f1, score_type=['mean'])
+      scheduler=scheduler, log_freq=log_freq, start_epoch=start_epoch, start_f1=start_f1, score_type=['mean'])
 eval_time = time.process_time() - time_m
 train_time =  time_m - start_time
 

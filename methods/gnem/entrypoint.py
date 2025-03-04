@@ -22,28 +22,34 @@ import torch.nn as nn
 parser = argparse.ArgumentParser(description='Benchmark a dataset with a method')
 parser.add_argument('input', type=pathtype.Path(readable=True), nargs='?', default='../../datasets/d2_abt_buy',
                     help='Input directory containing the dataset')
-parser.add_argument('output', type=pathtype.Path(writable=True), nargs='?', default='../../output/gnem',
+parser.add_argument('output', type=str, nargs='?', default='../../output/gnem',
                     help='Output directory to store the output')
 parser.add_argument('-e', '--epochs', type=int, nargs='?', default=1,
                     help='Number of epochs to train the model')
 
 args = parser.parse_args()
+os.makedirs(args.output, exist_ok=True)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-print("Hi, I'm DeepMatcher entrypoint!")
+print("Hi, I'm GNEM entrypoint!")
+print("Input taken from: ", args.input)
 print("Input directory: ", os.listdir(args.input))
 print("Output directory: ", os.listdir(args.output))
 
 train_table = pd.read_csv(os.path.join(args.input, 'train.csv'), encoding_errors='replace')
+val_table = pd.read_csv(os.path.join(args.input, 'valid.csv'), encoding_errors='replace')
 test_table = pd.read_csv(os.path.join(args.input, 'test.csv'), encoding_errors='replace')
 
 train_table = train_table.loc[:,['tableA_id', 'tableB_id', 'label']]
 print(train_table)
 train_table.columns = ['ltable_id', 'rtable_id', 'label']
+val_table = val_table.loc[:,['tableA_id', 'tableB_id', 'label']]
+val_table.columns = ['ltable_id', 'rtable_id', 'label']
 test_table = test_table.loc[:,['tableA_id', 'tableB_id', 'label']]
 test_table.columns = ['ltable_id', 'rtable_id', 'label']
 train_table.to_csv(os.path.join(args.output, 'train.csv'), index=False)
+val_table.to_csv(os.path.join(args.output, 'valid.csv'), index=False)
 test_table.to_csv(os.path.join(args.output, 'test.csv'), index=False)
 
 tableA = pd.read_csv(os.path.join(args.input, 'tableA.csv'), encoding_errors='replace')
@@ -57,15 +63,18 @@ tableB[str_cols] = tableB[str_cols].astype(str)
 useful_field_num = len(tableA.columns)-1
 gcn_dim = 768
 
-#val_dataset = MergedMatchingDataset(args.val_path, tableA, tableB, other_path=[args.train_path, args.test_path])
-test_dataset = MergedMatchingDataset(os.path.join(args.output, 'test.csv'), tableA, tableB, other_path=[os.path.join(args.output, 'train.csv')])
+val_dataset = MergedMatchingDataset(os.path.join(args.output, 'valid.csv'), tableA, tableB,
+                                    other_path=[os.path.join(args.output, 'train.csv'), os.path.join(args.output, 'test.csv')])
+test_dataset = MergedMatchingDataset(os.path.join(args.output, 'test.csv'), tableA, tableB,
+                                     other_path=[os.path.join(args.output, 'train.csv'), os.path.join(args.output, 'valid.csv')])
 train_dataset = MatchingDataset(os.path.join(args.output, 'train.csv'), tableA, tableB)
 
-train_iter = DataLoader(train_dataset, batch_size=8, collate_fn=collate_fn, shuffle=True)
-#val_iter = DataLoader(val_dataset, batch_size=args.batch_size, collate_fn=collate_fn, shuffle=False)
-test_iter = DataLoader(test_dataset, batch_size=8, collate_fn=collate_fn, shuffle=False)
+batch_size = 2
+train_iter = DataLoader(train_dataset, batch_size=batch_size, collate_fn=collate_fn, shuffle=True)
+val_iter = DataLoader(val_dataset, batch_size=batch_size, collate_fn=collate_fn, shuffle=False)
+test_iter = DataLoader(test_dataset, batch_size=batch_size, collate_fn=collate_fn, shuffle=False)
 
-embedmodel = EmbedModel(useful_field_num=useful_field_num,device=0)
+embedmodel = EmbedModel(useful_field_num=useful_field_num,device=device)
 
 gcn_layer = 1
 dropout = 0.0
@@ -110,10 +119,10 @@ neg = 2.0 / (1.0 + pos_neg_ratio)
 criterion = nn.CrossEntropyLoss(weight=torch.Tensor([neg, pos])).to(embedmodel.device)
 
 start_time = time.process_time()
-f1s, ps, rs, score_dicts, time_m = train(train_iter, args.output, logger, tf_logger, model, embedmodel, opt, criterion, args.epochs, test_iter=test_iter,# val_iter=val_iter,
+f1s, ps, rs, score_dicts, time_m, res_per_epoch = train(train_iter, args.output, logger, tf_logger, model, embedmodel, opt, criterion, args.epochs, test_iter=test_iter, val_iter=val_iter,
       scheduler=scheduler, log_freq=5, start_epoch=start_epoch, start_f1=start_f1, score_type=['mean'])
 eval_time = time.process_time() - time_m
 train_time =  time_m - start_time
 
-transform_output(score_dicts, f1s, ps, rs, train_time, eval_time, args.output)
+transform_output(score_dicts, f1s, ps, rs, train_time, eval_time, res_per_epoch, args.output)
 print("Final output: ", os.listdir(args.output))

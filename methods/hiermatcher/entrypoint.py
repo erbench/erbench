@@ -51,7 +51,7 @@ train, valid, test = datasets[0], datasets[1], datasets[2] if len(datasets) >= 3
 model = HierMatcher(hidden_size=150, embedding_length=300, manualSeed=args.seed)
 
 start_time = time.process_time()
-_, results_per_epoch = model.run_train(train, valid, test, epochs=args.epochs, batch_size=64, label_smoothing=0.05, pos_weight=1.5)
+_, results_per_epoch = model.run_train(train, valid, test, epochs=args.epochs, batch_size=32, label_smoothing=0.05, pos_weight=1.5)
 train_time = time.process_time() - start_time
 
 start_time = time.process_time()

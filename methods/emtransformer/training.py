@@ -39,7 +39,7 @@ def train(device,
     include_token_type_ids = (model_type=='bert')
     t_start = time.process_time()
     for epoch in trange(int(num_epocs), desc="Epoch"):
-        t_batch = time.process_time()
+        t_epoch = time.process_time()
         for step, batch in enumerate(tqdm(train_dataloader, desc="Iteration")):
             model.train()
 
@@ -77,7 +77,7 @@ def train(device,
         test_f1 = prfs[2][1]
         test_p = prfs[0][1]
         test_r = prfs[1][1]
-        curr_results = [epoch, test_f1, test_p, test_r, t_train-t_batch, t_eval-t_train, t_test-t_eval]
+        curr_results = [epoch, test_f1, test_p, test_r, t_train - t_epoch, t_eval - t_train, t_test - t_eval]
         results += [curr_results]
 
         if f1 > best_f1:
@@ -91,6 +91,9 @@ def train(device,
         if save_model_after_epoch:
             save_model(model, experiment_name, output_dir, epoch=epoch)
 
+        if (t_test - t_start) + (t_test - t_epoch) > 8 * 60 * 60:  # if running the next epoch would lead to a total runtime
+            # higher than 8 hours, break.
+            break
     results += [best_epoch]
     tb_writer.close()
     return results

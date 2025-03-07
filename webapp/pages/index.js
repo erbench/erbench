@@ -26,7 +26,7 @@ export const getServerSideProps = async ({req}) => {
 
 export default function Home({datasets, algorithms}) {
   const router = useRouter();
-  const filteringRecallOptions = [0.65, 0.75, 0.85];
+  const filteringRecallOptions = [0.85, 0.90, 0.95];
 
   // fields
   const [selectedDataset, setSelectedDataset] = useState(datasets[0]);

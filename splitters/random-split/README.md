@@ -10,32 +10,23 @@ It is expected that it contains the following files (in proper CSV format):
 - `tableB.csv` same as `tableA.csv`
 - `matches.csv` should have `tableA_id`, `tableB_id` attributes, which means that the `tableA_id` record is a match with the `tableB_id` record
 
-The produced output will include two files, and the split by recall value provided (0.7 by default):
+The produced output will include the following files:
 
-- `test.csv` where attributes are: `tableA_id`, `tableB_id` and `label` (0 or 1). The label is 1 if the pair is a match, 0 otherwise
+- `test.csv` where attributes are: `tableA_attr` for all attributes attr (incl. id) from table A; `tableB_attr` for all attributes attr (incl. id) from table B and `label` (0 or 1). The label is 1 if the pair is a match, 0 otherwise
 - `train.csv` same as `test.csv`
+- `valid.csv` same as `test.csv`
+- `tableA.csv`, `tableB.csv` and `matches.csv` will be copied to the output folder.
+- `split_statistics.txt`: Recall, Precision and size of the produced candidates and the splits.
 
-## How to use
-
-You can directly execute the docker image as following:
-
-```bash
-docker run --rm -v ../../datasets/d2_abt_buy:/data -v ../embedding:/workspace/embedding splitter-simple
-```
-
-This will assume that you have the input dataset in the current directory,
-it will mount it as `/data` and will output the results in the same folder.
-
-You can override the input and output directories by providing them as arguments to the docker image:
-
-```bash
-docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/output splitter-simple /data/input /data/output
-```
+# How to use
 
 ## Apptainer
 
 ```bash
 mkdir -p ../../apptainer ../../output
 apptainer build ../../apptainer/splitter_simple.sif container.def
-apptainer run ../../apptainer/splitter_simple.sif ../../datasets/d2_abt_buy/ ../output/
+srun --gpus=0 -p ampere apptainer run ../../apptainer/splitter_simple.sif ../../datasets/d2_abt_buy/ r_split
+
+# dev mode with bind
+srun --gpus=0 -p ampere apptainer run --bind ./:/srv ../../apptainer/splitter_simple.sif ../../datasets/d2_abt_buy/ r_split
 ```

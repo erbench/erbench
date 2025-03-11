@@ -40,7 +40,7 @@ print("Method input: ", os.listdir(args.input))
 prefix_1 = 'tableA_'
 prefix_2 = 'tableB_'
 columns_to_join = None
-test_df, valid_df, train_df = transform_input(args.input, columns_to_join, ' ', [prefix_1, prefix_2])
+train_df, valid_df, test_df = transform_input(args.input, columns_to_join, ' ', [prefix_1, prefix_2])
 print(test_df.columns, train_df.columns)
 
 device, n_gpu = initialize_gpu_seed(args.seed)
@@ -138,16 +138,6 @@ results_per_epoch = train(device,
 train_time = time.process_time() - start_time
 
 # Testing
-test_examples = [InputExample(i, row[prefix_1 + 'AgValue'], row[prefix_2 + 'AgValue'], row['label']) for i, row
-                 in test_df.iterrows()]
-
-test_data_loader = load_data(test_examples,
-                             label_list,
-                             tokenizer,
-                             max_seq_length,
-                             train_batch_size,
-                             DataType.TEST, model_name)
-
 include_token_type_ids = False
 if model_name == 'bert':
     include_token_type_ids = True

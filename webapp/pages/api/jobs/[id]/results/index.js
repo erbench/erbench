@@ -1,4 +1,4 @@
-import prisma from "../../../../prisma/client";
+import prisma from "../../../../../prisma/client";
 
 export default async function handler(req, res) {
   const jobId = req.query.id;
@@ -13,11 +13,12 @@ export default async function handler(req, res) {
 
       return res.status(200).json(results);
     } catch (error) {
+      console.error("Error fetching job results:", error);
       return res.status(500).json({error: "Failed to fetch results"});
     }
   }
 
-  if (req.method === 'PUT') {
+  if (req.method === 'POST' || req.method === 'PUT') {
     if (!req.body.status) {
       return res.status(400).json({error: 'status is required'});
     }
@@ -62,6 +63,7 @@ export default async function handler(req, res) {
           }
         });
       } catch (error) {
+        console.error("Error updating job results:", error);
         return res.status(500).json({error: "Failed to update results"});
       }
     }
@@ -78,6 +80,7 @@ export default async function handler(req, res) {
 
       return res.status(200).end();
     } catch (error) {
+      console.error("Error updating job status:", error);
       return res.status(500).json({error: "Failed to save status"});
     }
   }

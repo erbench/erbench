@@ -12,7 +12,8 @@ export default async function handler(req, res) {
         include: {
           filteringAlgo: true,
           matchingAlgo: true,
-          dataset: true
+          dataset: true,
+          results: true,
         }
       });
 
@@ -22,6 +23,7 @@ export default async function handler(req, res) {
 
       return res.status(200).json(job);
     } catch (error) {
+      console.error("Error fetching job:", error);
       return res.status(500).json({error: "Failed to fetch job"});
     }
   }

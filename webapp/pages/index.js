@@ -45,9 +45,9 @@ export default function Home({datasets, algorithms}) {
   // data
   const [results, setResults] = useState([]);
   const [forceSubmit, setForceSubmit] = useState(false);
-  const [job, setJob] = useState(null);
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
+    setResults([]);
     setDisabled(true);
 
     let filteringParams = {};
@@ -66,11 +66,36 @@ export default function Home({datasets, algorithms}) {
       matchingParams.epochs = matchingEpochs;
     }
 
-    fetch('/api/submit', {
+    if (!forceSubmit) {
+      const response = await fetch('/api/jobs/query', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          filters: {
+            datasetId: {value: selectedDataset.id, matchMode: 'equals'},
+            filteringAlgoId: {value: selectedFilteringAlgo.id, matchMode: 'equals'},
+            filteringParams: {value: filteringParams, matchMode: 'equals'},
+            matchingAlgoId: {value: selectedMatchingAlgo.id, matchMode: 'equals'},
+            matchingParams: {value: matchingParams, matchMode: 'equals'},
+          },
+        }),
+      });
+
+      const json = await response.json();
+      if (json?.page?.total > 0) {
+        setResults(json.data);
+        return;
+      }
+    }
+
+    const response = await fetch('/api/jobs', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         datasetId: selectedDataset.id,
@@ -79,20 +104,11 @@ export default function Home({datasets, algorithms}) {
         matchingAlgoId: selectedMatchingAlgo.id,
         matchingParams: matchingParams,
         notifyEmail: email,
-      })
-    })
-      .then((res) => {
-        return res.json().then((data) => {
-          console.log(res, data);
+      }),
+    });
 
-          if (res.status === 201) {
-            setJob(data);
-            router.push(`/jobs/${data.id}`);
-          } else {
-            setResults(data);
-          }
-        })
-      });
+    const job = await response.json();
+    router.push(`/jobs/${job.id}`);
   }
 
   if (isLoading) return <p>Loading...</p>
@@ -101,7 +117,7 @@ export default function Home({datasets, algorithms}) {
   return <div>
     <Head>
       <title>Submit a new job | ERBench</title>
-      <meta name="description" content="On this page you can submit a new job for entity resolution benchmarking" />
+      <meta name="description" content="On this page you can submit a new job for entity resolution benchmarking"/>
     </Head>
 
     <h1 className="text-4xl font-bold">No-code Benchmarking of Entity Resolution</h1>

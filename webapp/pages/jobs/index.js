@@ -4,10 +4,10 @@ import {DataTable} from 'primereact/datatable';
 import {Column} from 'primereact/column';
 import {FilterMatchMode} from "primereact/api";
 import Link from 'next/link';
+import Head from "next/head";
 
 import prisma from "../../prisma/client";
 import {dropdownFilterTemplate, renderDate, renderParams, renderStatusTemplate, statusRowFilterTemplate} from "../../utils/jobUtils";
-import Head from "next/head";
 
 export const getServerSideProps = async (context) => {
   const {email} = context.query || {};

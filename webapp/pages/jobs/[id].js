@@ -55,19 +55,17 @@ export default function ViewJob({job}) {
   const loadLazyPredictions = async () => {
     setLoadingPredictions(true);
     try {
-      const response = await fetch(`/api/jobs/${job.id}/predictions`, {
+      const response = await fetch(`/api/jobs/${job.id}/predictions/query`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(predictionsState)
       });
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
-      const data = await response.json();
-      setPredictions(data.predictions);
-      setTotalPredictions(data.total);
+      const results = await response.json();
+      setPredictions(results.data);
+      setTotalPredictions(results.page.total);
     } catch (error) {
       console.error("Failed to load predictions:", error);
     } finally {

@@ -29,7 +29,7 @@ export const statusRowFilterTemplate = (options, statuses) => {
 
 export const dropdownFilterTemplate = (options, possibleOptions) => {
   return <Dropdown value={options.value} options={possibleOptions} placeholder="Select One" className="p-column-filter" showClear
-                   onChange={(e) => options.filterCallback(e.value, options.index)}/>;
+                   onChange={(e) => options.filterApplyCallback(e.value)}/>;
 };
 
 export const renderParams = (params) => {

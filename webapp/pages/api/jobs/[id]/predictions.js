@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     if (params.filters) {
       if (params.filters.tableA_id?.value) {
         if (params.filters.tableA_id.matchMode === 'contains') {
-          whereClause.tableA_id = { contains: params.filters.tableA_id.value };
+          whereClause.tableA_id = {contains: params.filters.tableA_id.value};
         } else {
           whereClause.tableA_id = params.filters.tableA_id.value;
         }
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
 
       if (params.filters.tableB_id?.value) {
         if (params.filters.tableB_id.matchMode === 'contains') {
-          whereClause.tableB_id = { contains: params.filters.tableB_id.value };
+          whereClause.tableB_id = {contains: params.filters.tableB_id.value};
         } else {
           whereClause.tableB_id = params.filters.tableB_id.value;
         }
@@ -56,9 +56,9 @@ export default async function handler(req, res) {
         const probValue = parseFloat(params.filters.probability.value);
         if (!isNaN(probValue)) {
           if (params.filters.probability.matchMode === 'gte') {
-            whereClause.probability = { gte: probValue };
+            whereClause.probability = {gte: probValue};
           } else if (params.filters.probability.matchMode === 'lte') {
-            whereClause.probability = { lte: probValue };
+            whereClause.probability = {lte: probValue};
           } else {
             whereClause.probability = probValue;
           }
@@ -87,6 +87,26 @@ export default async function handler(req, res) {
     } catch (error) {
       console.error("Error fetching job predictions:", error);
       return res.status(500).json({error: "Failed to fetch predictions"});
+    }
+  }
+
+  if (req.method === 'PUT') {
+    const predictions = req.body.predictions.map(prediction => ({
+      jobId: req.body.jobId,
+      tableA_id: prediction.tableA_id,
+      tableB_id: prediction.tableB_id,
+      probability: prediction.probability,
+    }));
+
+    try {
+      await prisma.predictions.createMany({
+        data: predictions,
+        skipDuplicates: true,
+      });
+
+      return res.status(200).end();
+    } catch (error) {
+      return res.status(500).json({error: "Failed to save predictions"});
     }
   }
 

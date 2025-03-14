@@ -9,7 +9,7 @@ import {InputText} from "primereact/inputtext";
 
 import prisma from "../prisma/client";
 import {Checkbox} from "primereact/checkbox";
-import {renderParams} from "../utils/jobUtils";
+import {renderDate, renderParams} from "../utils/jobUtils";
 import Head from "next/head";
 
 export const getServerSideProps = async ({req}) => {
@@ -249,7 +249,7 @@ export default function Home({datasets, algorithms}) {
             <Column body={(row) => renderParams(row.filteringParams)} header="Filtering Params"></Column>
             <Column field="matchingAlgo.name" header="Matching Algorithm"></Column>
             <Column body={(row) => renderParams(row.matchingParams)} header="Matching Params"></Column>
-            <Column field="createdAt" header="Created"></Column>
+            <Column field="createdAt" header="Created" body={(row) => renderDate(row.createdAt)}></Column>
           </DataTable>
         </div>
       </div>

@@ -14,7 +14,7 @@ export default async function handler(req, res) {
       } = req.query;
 
       const sortField = req.query.sortField || 'createdAt';
-      const sortOrder = req.query.sortOrder === '-1' || req.query.sortOrder.toLowerCase() === 'desc' ? 'desc' : 'asc';
+      const sortOrder = req.query.sortOrder === '-1' || req.query.sortOrder?.toLowerCase() === 'desc' ? 'desc' : 'asc';
 
       // Build where clause based on provided filters
       const whereClause = {};

@@ -1,25 +1,35 @@
 import React from 'react';
-import { ProgressBar } from 'primereact/progressbar';
+import {Tag} from "primereact/tag";
+import {capitalize} from "./formattingUtils";
+import {Dropdown} from "primereact/dropdown";
+
+const getSeverity = (status) => {
+  const severityMap = {
+    pending: 'info',
+    running: 'warning',
+    completed: 'success',
+    failed: 'danger'
+  };
+
+  return severityMap[status] || 'contrast';
+}
+
+const statusItemTemplate = (option) => {
+  return <Tag value={capitalize(option)} severity={getSeverity(option)}/>;
+};
 
 export const renderStatusTemplate = (rowData) => {
-  let classNames = '';
-  let progress = 0;
+  return statusItemTemplate(rowData.status);
+};
 
-  if (rowData.status === 'completed') {
-    progress = 100;
-    classNames = 'p-progressbar-success';
-  } else if (rowData.status === 'failed') {
-    progress = 100;
-    classNames = 'p-progressbar-failed';
-  } else if (rowData.status === 'running') {
-    progress = 30;
-  }
+export const statusRowFilterTemplate = (options, statuses) => {
+  return <Dropdown value={options.value} options={statuses} placeholder="Select One" className="p-column-filter" showClear
+                   onChange={(e) => options.filterApplyCallback(e.value)} itemTemplate={statusItemTemplate}/>;
+};
 
-  return (
-    <React.Fragment>
-      <ProgressBar value={progress} showValue={false} className={classNames}/>
-    </React.Fragment>
-  );
+export const dropdownFilterTemplate = (options, possibleOptions) => {
+  return <Dropdown value={options.value} options={possibleOptions} placeholder="Select One" className="p-column-filter" showClear
+                   onChange={(e) => options.filterCallback(e.value, options.index)}/>;
 };
 
 export const renderParams = (params) => {
@@ -34,3 +44,10 @@ export const renderParams = (params) => {
     </div>
   );
 };
+
+export const renderDate = (dateString) => {
+  if (!dateString) return '';
+
+  const date = new Date(dateString);
+  return date.toISOString().replace('T', ' ').substring(0, 19);
+}

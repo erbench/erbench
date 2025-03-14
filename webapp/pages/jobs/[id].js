@@ -5,19 +5,7 @@ import {Panel} from "primereact/panel";
 import {DataTable} from "primereact/datatable";
 import {Column} from "primereact/column";
 import Head from 'next/head';
-
-const capitalize = s => s && String(s[0]).toUpperCase() + String(s).slice(1);
-
-const hideEmail = email => {
-  if (!email) return '';
-  const [localPart, domain] = email.split('@');
-  return `${localPart.substring(0, 3)}***@${domain}`;
-};
-
-BigInt.prototype.toJSON = function () {
-  const int = Number.parseInt(this.toString());
-  return int ?? this.toString();
-};
+import {hideEmail} from "../../utils/formattingUtils";
 
 export const getServerSideProps = async ({query}) => {
   const {id} = query;

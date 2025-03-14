@@ -1,8 +1,9 @@
 import argparse
 import pathtype
 
-from erbench.client import ErbenchClient
+from erbench.client import ErbenchClient, JobStatus
 from erbench.importer import import_results
+from manager.erbench.importer import import_predictions
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Imports results of entity resolution tasks into database')
@@ -14,14 +15,21 @@ if __name__ == "__main__":
                         help='Slurm job ID of the entity resolution task, used to gather utilization metrics')
     args = parser.parse_args()
 
+    print(f"Importing results for job {args.job_id} from {args.input_dir}")
+
     # Initialize the client (loads configuration from .env file)
     erbench_client = ErbenchClient()
 
-    print(f"Importing results for job {args.job_id} from {args.input_dir}")
-    if import_results(args.job_id, args.input_dir, erbench_client):
-        print(f"Data population complete for job {args.job_id}")
-    else:
-        exit(1)
+    results = import_results(args.input_dir)
+    if not results: exit(1)
 
-    print("Data upload completed successfully")
+    erbench_client.send_results(args.job_id, JobStatus.COMPLETED, results)
+    print("Results upload completed successfully")
+
+    predictions = import_predictions(args.input_dir)
+    if not predictions: exit(1)
+
+    erbench_client.send_predictions(args.job_id, predictions)
+    print("Predictions upload completed successfully")
+
     exit(0)

@@ -1,35 +1,18 @@
 import os
 import csv
+from typing import List
 
-from .client import ErbenchClient, JobStatus, Metrics
+from .client import Metrics, Prediction
 
 
-def import_results(job_id: str, directory: str, client: ErbenchClient, results = None) -> bool:
-    """
-    Reads metrics and predictions files from results directory and uploads to database.
-
-    Args:
-        job_id (str): The job ID
-        directory (str): Path to directory containing metrics.csv and predictions.csv
-        client (ErbenchClient): Instance of ErbenchClient to interact with the API
-        results (Metrics, optional): Metrics object to populate with results
-
-    Returns:
-        bool: True if successful, False otherwise
-    """
-    metrics_path = os.path.join(directory, "metrics.csv")
-    predictions_path = os.path.join(directory, "predictions.csv")
-
+def import_results(directory: str, results: Metrics = None) -> Metrics | None:
     if results is None:
         results = Metrics()
 
+    metrics_path = os.path.join(directory, "metrics.csv")
     if not os.path.exists(metrics_path):
         print(f"Error: {metrics_path} does not exist")
-        return False
-
-    if not os.path.exists(predictions_path):
-        print(f"Error: {predictions_path} does not exist")
-        return False
+        return None
 
     try:
         with open(metrics_path, 'r') as f:
@@ -45,9 +28,17 @@ def import_results(job_id: str, directory: str, client: ErbenchClient, results =
             results['evalTime'] = round(float(metrics.get("eval_time", 0)))
     except Exception as e:
         print(f"Error reading metrics.csv: {e}")
-        return False
+        return None
 
-    # Read predictions from CSV file
+    return results
+
+
+def import_predictions(directory: str) -> List[Prediction] | None:
+    predictions_path = os.path.join(directory, "predictions.csv")
+    if not os.path.exists(predictions_path):
+        print(f"Error: {predictions_path} does not exist")
+        return None
+
     predictions = []
     try:
         with open(predictions_path, 'r') as f:
@@ -63,16 +54,6 @@ def import_results(job_id: str, directory: str, client: ErbenchClient, results =
                 })
     except Exception as e:
         print(f"Error reading predictions.csv: {e}")
-        return False
+        return None
 
-    response = client.send_results(job_id, JobStatus.COMPLETED, results)
-    if response.status_code != 200:
-        print(f"Error sending results: {response.status_code}")
-        return False
-
-    predictions_response = client.send_predictions(job_id, predictions)
-    if predictions_response.status_code != 200:
-        print(f"Error sending predictions: {predictions_response.status_code}")
-        return False
-
-    return True
+    return predictions

@@ -36,8 +36,9 @@ export default async function handler(req, res) {
             trainTime: req.body.trainTime,
             evalTime: req.body.evalTime,
 
+            cpuAllocated: req.body.cpuAllocated,
             cpuUtilized: req.body.cpuUtilized,
-            memoryUtilized: req.body.memoryUtilized,
+            memUtilized: req.body.memUtilized,
             gpuAllocated: req.body.gpuAllocated,
             gpuUtilized: req.body.gpuUtilized,
             gpuMemUtilized: req.body.gpuMemUtilized,
@@ -53,8 +54,9 @@ export default async function handler(req, res) {
             trainTime: req.body.trainTime,
             evalTime: req.body.evalTime,
 
+            cpuAllocated: req.body.cpuAllocated,
             cpuUtilized: req.body.cpuUtilized,
-            memoryUtilized: req.body.memoryUtilized,
+            memUtilized: req.body.memUtilized,
             gpuAllocated: req.body.gpuAllocated,
             gpuUtilized: req.body.gpuUtilized,
             gpuMemUtilized: req.body.gpuMemUtilized,

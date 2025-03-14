@@ -86,6 +86,7 @@ model Result {
   evalTime  BigInt?
 
   // resources
+  cpuAllocated   Int?
   cpuUtilized    BigInt?
   memUtilized    BigInt?
   gpuAllocated   Int?

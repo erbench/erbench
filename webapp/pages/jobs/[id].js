@@ -184,48 +184,54 @@ export default function ViewJob({job}) {
             <div className="flex flex-column gap-2">
               <div className="flex justify-content-between">
                 <span className="font-medium">F1 Score:</span>
-                <span>{job.result.f1 !== null ? job.result.f1.toFixed(4) : 'N/A'}</span>
+                <span>{job.result.f1 !== null ? job.result.f1.toFixed(6) : 'N/A'}</span>
               </div>
               <div className="flex justify-content-between">
                 <span className="font-medium">Precision:</span>
-                <span>{job.result.precision !== null ? job.result.precision.toFixed(4) : 'N/A'}</span>
+                <span>{job.result.precision !== null ? job.result.precision.toFixed(6) : 'N/A'}</span>
               </div>
               <div className="flex justify-content-between">
                 <span className="font-medium">Recall:</span>
-                <span>{job.result.recall !== null ? job.result.recall.toFixed(4) : 'N/A'}</span>
+                <span>{job.result.recall !== null ? job.result.recall.toFixed(6) : 'N/A'}</span>
               </div>
               {job.result.trainTime !== null && (
                 <div className="flex justify-content-between">
                   <span className="font-medium">Train time:</span>
-                  <span>{(Number(job.result.trainTime) / 1000).toFixed(2)}s</span>
+                  <span>{(Number(job.result.trainTime) / 1000).toFixed(3)}s</span>
                 </div>
               )}
               {job.result.evalTime !== null && (
                 <div className="flex justify-content-between">
                   <span className="font-medium">Evaluation time:</span>
-                  <span>{(Number(job.result.evalTime) / 1000).toFixed(2)}s</span>
+                  <span>{(Number(job.result.evalTime) / 1000).toFixed(3)}s</span>
                 </div>
               )}
               {job.result.totalRuntime !== null && (
                 <div className="flex justify-content-between">
                   <span className="font-medium">Total Runtime:</span>
-                  <span>{job.result.totalRuntime}</span>
+                  <span>{(Number(job.result.totalRuntime) / 1000).toFixed(3)}s</span>
                 </div>
               )}
             </div>
           </div>
           <div className="col-6">
             <div className="flex flex-column gap-2">
+              {job.result.cpuAllocated !== null && (
+                <div className="flex justify-content-between">
+                  <span className="font-medium">CPUs Allocated:</span>
+                  <span>{Number(job.result.cpuAllocated)}</span>
+                </div>
+              )}
               {job.result.cpuUtilized !== null && (
                 <div className="flex justify-content-between">
-                  <span className="font-medium">CPU Usage (walltime):</span>
-                  <span>{(Number(job.result.cpuUtilized) / 1000000000).toFixed(2)}s</span>
+                  <span className="font-medium">CPU Usage (core-walltime):</span>
+                  <span>{(Number(job.result.cpuUtilized) / 1000).toFixed(2)}s</span>
                 </div>
               )}
               {job.result.memUtilized !== null && (
                 <div className="flex justify-content-between">
                   <span className="font-medium">Memory Usage:</span>
-                  <span>{Math.round(Number(job.result.memUtilized) / 1024 / 1024)}MB</span>
+                  <span>{(Number(job.result.memUtilized) / 1024 / 1024 / 1024).toFixed(2)} GB</span>
                 </div>
               )}
               {job.result.gpuAllocated && (
@@ -237,13 +243,13 @@ export default function ViewJob({job}) {
                   {job.result.gpuUtilized !== null && (
                     <div className="flex justify-content-between">
                       <span className="font-medium">GPU Usage:</span>
-                      <span>{(Number(job.result.gpuUtilized) / 1000000000).toFixed(2)}s</span>
+                      <span>{Number(job.result.gpuUtilized)}s</span>
                     </div>
                   )}
                   {job.result.gpuMemUtilized !== null && (
                     <div className="flex justify-content-between">
                       <span className="font-medium">GPU Memory:</span>
-                      <span>{job.result.gpuMemUtilized}MB</span>
+                      <span>{(Number(job.result.gpuMemUtilized) / 1024).toFixed(2)} GB</span>
                     </div>
                   )}
                 </>
@@ -251,7 +257,7 @@ export default function ViewJob({job}) {
               {job.result.energyConsumed !== null && (
                 <div className="flex justify-content-between">
                   <span className="font-medium">Energy Consumed:</span>
-                  <span>{job.result.energyConsumed}J</span>
+                  <span>{Math.round(Number(job.result.energyConsumed) / 1000)} kJ</span>
                 </div>
               )}
             </div>

@@ -1,0 +1,9 @@
+name: erbench
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - requests
+  - python-dotenv
+  - pip:
+      - pathtype

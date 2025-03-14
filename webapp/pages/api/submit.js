@@ -4,7 +4,7 @@ import prisma from "../../prisma/client";
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    if (!req.body.datasetId || !req.body.algorithmId) {
+    if (!req.body.datasetId || !req.body.filteringAlgoId || !req.body.matchingAlgoId) {
       return res.status(400).json({error: 'datasetId and algorithmId are required'});
     }
 

@@ -1,8 +1,9 @@
 import argparse
 import pathtype
+import subprocess
 
 from erbench.client import ErbenchClient, JobStatus
-from erbench.importer import import_results
+from erbench.importer import import_results, import_slurm_metrics
 from manager.erbench.importer import import_predictions
 
 if __name__ == "__main__":
@@ -20,8 +21,24 @@ if __name__ == "__main__":
     # Initialize the client (loads configuration from .env file)
     erbench_client = ErbenchClient()
 
+    slurm_job_str = None
+    if args.slurm_job_id:
+        try:
+            print(f"Retrieving Slurm metrics for job {args.slurm_job_id}")
+            process = subprocess.run(['sacct', '-j', str(args.slurm_job_id), '--json'], capture_output=True, text=True)
+            if process.returncode == 0:
+                slurm_job_str = process.stdout
+            else:
+                print(f"Warning: Failed to retrieve Slurm metrics: {process.stderr}")
+        except Exception as e:
+            print(f"Warning: Error retrieving Slurm metrics: {str(e)}")
+
     results = import_results(args.input_dir)
     if not results: exit(1)
+
+    if slurm_job_str:
+        results = import_slurm_metrics(slurm_job_str, results)
+        print("Slurm metrics retrieved successfully")
 
     erbench_client.send_results(args.job_id, JobStatus.COMPLETED, results)
     print("Results upload completed successfully")

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 
 import prisma from "../../prisma/client";
 import {Panel} from "primereact/panel";
@@ -30,7 +30,6 @@ export const getServerSideProps = async ({query}) => {
       matchingAlgo: true,
       dataset: true,
       result: true,
-      predictions: true,
     }
   });
 
@@ -44,6 +43,65 @@ export const getServerSideProps = async ({query}) => {
 }
 
 export default function ViewJob({job}) {
+  const [predictions, setPredictions] = useState(null);
+  const [loadingPredictions, setLoadingPredictions] = useState(false);
+  const [totalPredictions, setTotalPredictions] = useState(0);
+  const [predictionsState, setPredictionsState] = useState({
+    first: 0,
+    rows: 20,
+    page: 1,
+    sortField: 'probability',
+    sortOrder: 1,
+    filters: {
+      tableA_id: {value: '', matchMode: 'equals'},
+      tableB_id: {value: '', matchMode: 'equals'},
+      probability: {value: '', matchMode: 'gte'},
+    }
+  });
+
+  useEffect(() => {
+    loadLazyPredictions();
+  }, [predictionsState]);
+
+  const loadLazyPredictions = async () => {
+    setLoadingPredictions(true);
+    try {
+      const response = await fetch(`/api/jobs/${job.id}/predictions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(predictionsState)
+      });
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      const data = await response.json();
+      setPredictions(data.predictions);
+      setTotalPredictions(data.total);
+    } catch (error) {
+      console.error("Failed to load predictions:", error);
+    } finally {
+      setLoadingPredictions(false);
+    }
+  };
+
+  const setPredictionsStateAndResetPage = (e) => {
+    e.first = 0;
+    setPredictionsState(e);
+  }
+
+  const idFilterOptions = [
+    {label: 'Contains', value: 'contains'},
+    {label: 'Equals', value: 'equals'}
+  ];
+
+  const probabilityFilterOptions = [
+    {label: 'Greater than or equal to', value: 'gte'},
+    {label: 'Less than or equal to', value: 'lte'},
+    {label: 'Equals', value: 'equals'}
+  ];
+
   if (!job) {
     return <div>
       <h1 className="text-4xl font-bold">Job not found</h1>
@@ -201,12 +259,17 @@ export default function ViewJob({job}) {
       </Panel>
     )}
 
-    {(job.result && job.predictions) && (
+    {job.status === 'completed' && (
       <Panel header="Predictions" className="mt-3 p-panel-no-padding">
-        <DataTable value={job.predictions} stripedRows size="small" emptyMessage={"No predictions returned"}>
-          <Column field="tableA_id" header="Table A (ID)"/>
-          <Column field="tableB_id" header="Table B (ID)"/>
-          <Column field="probability" header="Match Probability"/>
+        <DataTable value={predictions} lazy stripedRows size="small" emptyMessage={"No predictions returned"} loading={loadingPredictions}
+                   paginator first={predictionsState.first} rows={predictionsState.rows} totalRecords={totalPredictions}
+                   sortField={predictionsState.sortField} sortOrder={predictionsState.sortOrder}
+                   filters={predictionsState.filters} filterDisplay="row" filterDelay={500} onFilter={setPredictionsStateAndResetPage}
+                   onPage={setPredictionsState} onSort={setPredictionsState}>
+          <Column field="tableA_id" header="Table A (ID)" sortable filter filterPlaceholder="Filter results" filterMatchModeOptions={idFilterOptions}/>
+          <Column field="tableB_id" header="Table B (ID)" sortable filter filterPlaceholder="Filter results" filterMatchModeOptions={idFilterOptions}/>
+          <Column field="probability" header="Probability" sortable filter filterPlaceholder="Filter results"
+                  filterMatchModeOptions={probabilityFilterOptions}/>
         </DataTable>
       </Panel>
     )}

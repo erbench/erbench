@@ -10,6 +10,7 @@ import {InputText} from "primereact/inputtext";
 import prisma from "../prisma/client";
 import {Checkbox} from "primereact/checkbox";
 import {renderParams} from "../utils/jobUtils";
+import Head from "next/head";
 
 export const getServerSideProps = async ({req}) => {
   const algorithms = await prisma.algorithm.findMany();
@@ -98,6 +99,11 @@ export default function Home({datasets, algorithms}) {
   if (!algorithms || !datasets) return <p>Something went wrong</p>
 
   return <div>
+    <Head>
+      <title>Submit a new job | ERBench</title>
+      <meta name="description" content="On this page you can submit a new job for entity resolution benchmarking" />
+    </Head>
+
     <h1 className="text-4xl font-bold">No-code Benchmarking of Entity Resolution</h1>
 
     <div className="grid mt-4">

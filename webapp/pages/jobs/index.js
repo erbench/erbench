@@ -5,6 +5,7 @@ import {Column} from 'primereact/column';
 
 import prisma from "../../prisma/client";
 import {renderParams, renderStatusTemplate} from "../../utils/jobUtils";
+import Head from "next/head";
 
 export const getServerSideProps = async () => {
   const jobs = await prisma.job.findMany({
@@ -37,6 +38,11 @@ export default function ListJobs({jobs}) {
   }
 
   return <div>
+    <Head>
+      <title>Jobs list | ERBench</title>
+      <meta name="description" content="List of submitted jobs for entity resolution" />
+    </Head>
+
     <h1 className="text-4xl font-bold">Jobs list</h1>
 
     <div className="card">

@@ -4,6 +4,7 @@ import prisma from "../../prisma/client";
 import {Panel} from "primereact/panel";
 import {DataTable} from "primereact/datatable";
 import {Column} from "primereact/column";
+import Head from 'next/head';
 
 const capitalize = s => s && String(s[0]).toUpperCase() + String(s).slice(1);
 
@@ -109,6 +110,11 @@ export default function ViewJob({job}) {
   }
 
   return <div>
+    <Head>
+      <title>Job: {job.id} | ERBench</title>
+      <meta name="description" content={`Job ${job.id} details, including status, parameters, and results.`}/>
+    </Head>
+
     <h1 className="text-4xl font-bold"><span style={{color: '#777', fontWeight: 'normal'}}>Job:</span> {job.id}</h1>
 
     <Panel header={"Status: " + job.status}>

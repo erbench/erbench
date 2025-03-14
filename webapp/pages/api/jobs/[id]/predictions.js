@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     const take = parseInt(params.rows) || 20;
 
     const sortField = req.query.sortField || 'probability';
-    const sortOrder = req.query.sortOrder === '-1' ? 'asc' : 'desc';
+    const sortOrder = req.query.sortOrder === '-1' || req.query.sortOrder.toLowerCase() === 'desc' ? 'desc' : 'asc';
 
     const whereClause = {
       jobId: jobId

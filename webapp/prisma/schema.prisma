@@ -92,7 +92,7 @@ model Result {
   gpuUtilized    BigInt?
   gpuMemUtilized BigInt?
   energyConsumed BigInt?
-  totalRuntime   BigInt
+  totalRuntime   BigInt?
 
   createdAt DateTime @default(now())
 }

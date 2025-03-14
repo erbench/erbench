@@ -147,10 +147,12 @@ export default function ViewJob({job}) {
                   <span>{(Number(job.result.evalTime) / 1000).toFixed(2)}s</span>
                 </div>
               )}
-              <div className="flex justify-content-between">
-                <span className="font-medium">Total Runtime:</span>
-                <span>{job.result.totalRuntime}</span>
-              </div>
+              {job.result.totalRuntime !== null && (
+                <div className="flex justify-content-between">
+                  <span className="font-medium">Total Runtime:</span>
+                  <span>{job.result.totalRuntime}</span>
+                </div>
+              )}
             </div>
           </div>
           <div className="col-6">

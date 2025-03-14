@@ -14,11 +14,12 @@ export default async function handler(req, res) {
     }));
 
     await prisma.predictions.createMany({
-      data: predictions
+      data: predictions,
+      skipDuplicates: true,
     });
 
-    res.status(200);
+    return res.status(200).end();
   } else {
-    res.status(405)
+    return res.status(405).end();
   }
 }

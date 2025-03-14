@@ -45,6 +45,6 @@ export default async function handler(req, res) {
 
     return res.status(201).json(newJob);
   } else {
-    res.status(405)
+    return res.status(405).end();
   }
 }

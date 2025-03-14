@@ -6,6 +6,7 @@ import {DataTable} from "primereact/datatable";
 import {Column} from "primereact/column";
 import Head from 'next/head';
 import {hideEmail} from "../../utils/formattingUtils";
+import {Button} from "primereact/button";
 
 export const getServerSideProps = async ({query}) => {
   const {id} = query;
@@ -94,6 +95,14 @@ export default function ViewJob({job}) {
       <h1 className="text-4xl font-bold">Job not found</h1>
     </div>
   }
+
+  const predictionsFooter = (
+    <div className="flex justify-content-between align-items-center">
+      <div>Total predictions: {totalPredictions}</div>
+      <Button type="button" size="small" icon="pi pi-file-export" rounded data-pr-tooltip="Export to CSV"
+              onClick={() => window.open(`/api/jobs/${job.id}/predictions/csv`, '_blank')}/>
+    </div>
+  );
 
   return <div>
     <Head>
@@ -252,7 +261,7 @@ export default function ViewJob({job}) {
     )}
 
     {job.status === 'completed' && (
-      <Panel header="Predictions" className="mt-3 p-panel-no-padding">
+      <Panel header="Predictions" footer={predictionsFooter} className="mt-3 p-panel-no-padding">
         <DataTable value={predictions} lazy stripedRows size="small" emptyMessage={"No predictions returned"} loading={loadingPredictions}
                    paginator first={predictionsState.first} rows={predictionsState.rows} totalRecords={totalPredictions}
                    sortField={predictionsState.sortField} sortOrder={predictionsState.sortOrder}

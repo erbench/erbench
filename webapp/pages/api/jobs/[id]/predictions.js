@@ -91,11 +91,11 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'PUT') {
-    const predictions = req.body.predictions.map(prediction => ({
-      jobId: req.body.jobId,
-      tableA_id: prediction.tableA_id,
-      tableB_id: prediction.tableB_id,
-      probability: prediction.probability,
+    const predictions = req.body.map(p => ({
+      jobId: jobId,
+      tableA_id: p.tableA_id,
+      tableB_id: p.tableB_id,
+      probability: p.probability,
     }));
 
     try {

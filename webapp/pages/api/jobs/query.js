@@ -12,7 +12,7 @@ export async function queryJobs(params) {
   const sortOrder = parseInt(params.sortOrder) === -1 || (typeof params.sortOrder === 'string' && params.sortOrder?.toLowerCase() === 'desc') ? 'desc' : 'asc';
 
   const whereClause = {
-    status: 'pending',
+    status: {in: ['pending', 'running']},
   };
 
   if (params.filters) {
@@ -29,23 +29,23 @@ export async function queryJobs(params) {
     }
 
     if (params.filters.datasetId?.value) {
-        whereClause.datasetId = params.filters.datasetId.value;
+      whereClause.datasetId = params.filters.datasetId.value;
     }
 
     if (params.filters.filteringAlgoId?.value) {
-        whereClause.filteringAlgoId = params.filters.filteringAlgoId.value;
+      whereClause.filteringAlgoId = params.filters.filteringAlgoId.value;
     }
 
     if (params.filters.matchingAlgoId?.value) {
-        whereClause.matchingAlgoId = params.filters.matchingAlgoId.value;
+      whereClause.matchingAlgoId = params.filters.matchingAlgoId.value;
     }
 
     if (params.filters.filteringParams?.value) {
-        whereClause.filteringParams = {equals: params.filters.filteringParams.value};
+      whereClause.filteringParams = {equals: params.filters.filteringParams.value};
     }
 
     if (params.filters.matchingParams?.value) {
-        whereClause.matchingParams = {equals: params.filters.matchingParams.value};
+      whereClause.matchingParams = {equals: params.filters.matchingParams.value};
     }
   }
 

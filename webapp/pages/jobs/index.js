@@ -94,12 +94,12 @@ export default function ListJobs({jobs, filterEmail}) {
           <span className="text-sm text-gray-600 white-space-nowrap">Want to find your jobs?</span>
           <div className="p-inputgroup">
             <input id="emailFilter" type="email" placeholder="Enter email address" className="p-inputtext p-component p-2"
-              onKeyDown={(e) => e.key === 'Enter' && router.push(`/jobs?email=${e.target.value}`)}/>
+                   onKeyDown={(e) => e.key === 'Enter' && router.push(`/jobs?email=${e.target.value}`)}/>
             <button className="p-button p-component p-2 bg-blue-500 text-white"
-              onClick={() => {
-                const email = document.getElementById('emailFilter').value;
-                if (email) router.push(`/jobs?email=${email}`);
-              }}>
+                    onClick={() => {
+                      const email = document.getElementById('emailFilter').value;
+                      if (email) router.push(`/jobs?email=${email}`);
+                    }}>
               Filter
             </button>
           </div>

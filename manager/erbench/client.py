@@ -1,6 +1,5 @@
 import os
 import requests
-from dotenv import load_dotenv
 from enum import Enum
 from typing import List, TypedDict, Dict, Any, Optional
 
@@ -38,8 +37,10 @@ class Job(TypedDict):
     datasetId: int
     filteringAlgoId: int
     filteringParams: Dict[str, Any]
+    filteringSlurmId: int
     matchingAlgoId: int
     matchingParams: Dict[str, Any]
+    matchingSlurmId: int
     notifyEmail: str
     createdAt: str
     filteringAlgo: FilteringAlgo
@@ -64,6 +65,7 @@ class Metrics(TypedDict, total=False):
 
 
 class JobStatus(Enum):
+    PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
     FAILED = "failed"
@@ -79,9 +81,7 @@ class Prediction(TypedDict):
 class ErbenchClient:
 
     def __init__(self):
-        load_dotenv()
-
-        self.base_url = os.getenv("API_BASE_URL")
+        self.base_url = os.getenv("API_BASE_URL", "https://demo5.kbs.uni-hannover.de")
         self.api_key = os.getenv("API_KEY")
 
         if not self.base_url:
@@ -94,7 +94,23 @@ class ErbenchClient:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 
-        return response.json()
+        json = response.json()
+        if response.status_code == 200 and json['data']:
+            return json['data']
+        else:
+            return []
+
+    def update_job(self, job_id: str, status: JobStatus, filtering_slurm_id = None, matching_slurm_id = None) -> requests.Response:
+        url = f"{self.base_url}/api/jobs/{job_id}"
+        headers = self._get_headers()
+
+        response = requests.put(url, headers=headers, json={
+            "status": status.value,
+            "filteringSlurmId": filtering_slurm_id,
+            "matchingSlurmId": matching_slurm_id,
+        })
+        response.raise_for_status()
+        return response
 
     def send_results(self, job_id: str, status: JobStatus, metrics: Metrics) -> requests.Response:
         url = f"{self.base_url}/api/jobs/{job_id}/results"

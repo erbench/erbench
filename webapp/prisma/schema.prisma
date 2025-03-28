@@ -56,15 +56,17 @@ enum Status {
 }
 
 model Job {
-  id              String   @id @default(cuid())
-  status          Status   @default(pending)
-  datasetId       Int
-  filteringAlgoId Int
-  filteringParams Json?
-  matchingAlgoId  Int
-  matchingParams  Json?
-  notifyEmail     String?
-  createdAt       DateTime @default(now())
+  id               String   @id @default(cuid())
+  status           Status   @default(pending)
+  datasetId        Int
+  filteringAlgoId  Int
+  filteringParams  Json?
+  filteringSlurmId Int?
+  matchingAlgoId   Int
+  matchingParams   Json?
+  matchingSlurmId  Int?
+  notifyEmail      String?
+  createdAt        DateTime @default(now())
 
   filteringAlgo Algorithm     @relation("filteringAlgo", fields: [filteringAlgoId], references: [id])
   matchingAlgo  Algorithm     @relation("matchingAlgo", fields: [matchingAlgoId], references: [id])

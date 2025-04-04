@@ -126,9 +126,6 @@ if __name__ == "__main__":
     if args.output is None:
         args.output = args.input
 
-    if '/' not in args.output:
-        args.output = os.path.join(args.input, args.output)
-
     os.makedirs(args.output, exist_ok=True)
     if not os.path.isdir(args.output) or not os.access(args.output, os.W_OK):
         print("output folder does not exits or is not writable")

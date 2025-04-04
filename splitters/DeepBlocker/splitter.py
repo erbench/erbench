@@ -120,14 +120,10 @@ if __name__ == "__main__":
     if args.output is None:
         args.output = args.input
 
-    if '/' not in args.output:
-        output_folder = os.path.join(args.input, args.output)
-        os.makedirs(output_folder, exist_ok=True)
-    else:
-        output_folder = args.output
-        if not os.path.exists(output_folder):
-            print("output folder does not exits")
-            exit
+    os.makedirs(args.output, exist_ok=True)
+    if not os.path.isdir(args.output) or not os.access(args.output, os.W_OK):
+        print("output folder does not exits or is not writable")
+        exit(1)
 
     print("Hi, I'm DeepBlocker splitter, I'm doing random split of the input datasets into train and test sets.")
     tableA_df = pd.read_csv(os.path.join(args.input, 'tableA.csv'), encoding_errors='replace')

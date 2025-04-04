@@ -8,7 +8,7 @@ __pycache__
 .next
 node_modules
 test
-embedding
+embeddings
 db_split
 kj_split
 slurm*.out

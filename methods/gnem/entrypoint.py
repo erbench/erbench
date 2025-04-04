@@ -22,17 +22,26 @@ import random
 import numpy as np
 
 parser = argparse.ArgumentParser(description='Benchmark a dataset with a method')
-parser.add_argument('input', type=pathtype.Path(readable=True), nargs='?', default='../../datasets/d2_abt_buy',
+parser.add_argument('input', type=pathtype.Path(readable=True), nargs='?', default='/data',
                     help='Input directory containing the dataset')
-parser.add_argument('output', type=str, nargs='?', default='../../output/gnem',
+parser.add_argument('output', type=str, nargs='?',
                     help='Output directory to store the output')
 parser.add_argument('-e', '--epochs', type=int, nargs='?', default=1,
                     help='Number of epochs to train the model')
 parser.add_argument('-s', '--seed', type=int, nargs='?', default=random.randint(0, 4294967295),
                     help='The random state used to initialize the algorithms and split dataset')
-
 args = parser.parse_args()
+
+if args.output is None:
+    args.output = args.input
+
+if '/' not in args.output:
+    args.output = os.path.join(args.input, args.output)
+
 os.makedirs(args.output, exist_ok=True)
+if not os.path.isdir(args.output) or not os.access(args.output, os.W_OK):
+    print("output folder does not exits or is not writable")
+    exit(1)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 torch.manual_seed(args.seed)

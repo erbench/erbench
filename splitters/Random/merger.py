@@ -1,5 +1,5 @@
+import os
 import argparse
-from os import path
 import pathtype
 import pandas as pd
 
@@ -8,18 +8,26 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Merges the test and train datasets to create matches pairs')
     parser.add_argument('input', type=pathtype.Path(readable=True), nargs='?', default='/data',
                         help='Input directory containing the dataset')
-    parser.add_argument('output', type=pathtype.Path(writable=True), nargs='?',
+    parser.add_argument('output', type=str, nargs='?',
                         help='Output directory to store the output. If not provided, input directory will be used')
     args = parser.parse_args()
 
     if args.output is None:
         args.output = args.input
 
+    if '/' not in args.output:
+        args.output = os.path.join(args.input, args.output)
+
+    os.makedirs(args.output, exist_ok=True)
+    if not os.path.isdir(args.output) or not os.access(args.output, os.W_OK):
+        print("output folder does not exits or is not writable")
+        exit(1)
+
     print("Hi, I'm merger, I'm creating matches file based on split datasets.")
-    test_df = pd.read_csv(path.join(args.input, 'test.csv'), encoding_errors='replace')
-    train_df = pd.read_csv(path.join(args.input, 'train.csv'), encoding_errors='replace')
+    test_df = pd.read_csv(os.path.join(args.input, 'test.csv'), encoding_errors='replace')
+    train_df = pd.read_csv(os.path.join(args.input, 'train.csv'), encoding_errors='replace')
     try:
-        valid_df = pd.read_csv(path.join(args.input, 'valid.csv'), encoding_errors='replace')
+        valid_df = pd.read_csv(os.path.join(args.input, 'valid.csv'), encoding_errors='replace')
     except FileNotFoundError:
         valid_df = pd.DataFrame() # empty df
     print("Input tables are:", "test", test_df.shape, "train", train_df.shape, "valid", valid_df.shape)
@@ -35,4 +43,4 @@ if __name__ == "__main__":
 
     print("Done! Found {} matches.".format(matches_df.shape[0]))
 
-    matches_df.to_csv(path.join(args.output, "matches.csv"), index=False)
+    matches_df.to_csv(os.path.join(args.output, "matches.csv"), index=False)

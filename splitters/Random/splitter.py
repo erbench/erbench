@@ -125,14 +125,14 @@ if __name__ == "__main__":
 
     if args.output is None:
         args.output = args.input
+
     if '/' not in args.output:
-        output_folder = os.path.join(args.input, args.output)
-        os.makedirs(output_folder, exist_ok=True)
-    else:
-        output_folder = args.output
-        if not os.path.exists(output_folder):
-            print("output folder does not exits")
-            exit
+        args.output = os.path.join(args.input, args.output)
+
+    os.makedirs(args.output, exist_ok=True)
+    if not os.path.isdir(args.output) or not os.access(args.output, os.W_OK):
+        print("output folder does not exits or is not writable")
+        exit(1)
 
     print("Hi, I'm simple splitter, I'm doing random split of the input datasets into train and test sets.")
     tableA_df = pd.read_csv(path.join(args.input, 'tableA.csv'), encoding_errors='replace')
@@ -153,15 +153,15 @@ if __name__ == "__main__":
                                      neg_pairs_ratio=args.neg_pairs_ratio, seed=args.seed)
     print("Done! Train size: {}, test size: {}.".format(train.shape[0], test.shape[0]))
 
-    train.to_csv(path.join(output_folder, "train.csv"), index=False)
-    valid.to_csv(path.join(output_folder, "valid.csv"), index=False)
-    test.to_csv(path.join(output_folder, "test.csv"), index=False)
+    train.to_csv(path.join(args.output, "train.csv"), index=False)
+    valid.to_csv(path.join(args.output, "valid.csv"), index=False)
+    test.to_csv(path.join(args.output, "test.csv"), index=False)
 
-    tableA_df.to_csv(os.path.join(output_folder, 'tableA.csv'), index=False)
-    tableB_df.to_csv(os.path.join(output_folder, 'tableB.csv'), index=False)
-    matches_df.to_csv(os.path.join(output_folder, 'matches.csv'), index=False)
+    tableA_df.to_csv(os.path.join(args.output, 'tableA.csv'), index=False)
+    tableB_df.to_csv(os.path.join(args.output, 'tableB.csv'), index=False)
+    matches_df.to_csv(os.path.join(args.output, 'matches.csv'), index=False)
 
-    f = open(os.path.join(output_folder, 'split_statistics.txt'), 'w')
+    f = open(os.path.join(args.output, 'split_statistics.txt'), 'w')
     print('Dataset statistics:', file=f)
     print(f'Entries Table A: {tableA_df.shape[0]}; Entries Table B: {tableB_df.shape[0]}', file=f)
     print(f'Num Matches: {matches_df.shape[0]}', file=f)

@@ -9,20 +9,28 @@ import pathtype
 import pandas as pd
 import deepmatcher as dm
 from transform import transform_input, transform_output
-import torch
 
 parser = argparse.ArgumentParser(description='Benchmark a dataset with a method')
 parser.add_argument('input', type=pathtype.Path(readable=True), nargs='?', default='/data',
                     help='Input directory containing the dataset')
-parser.add_argument('output', type=str, nargs='?', default='/data/output',
+parser.add_argument('output', type=str, nargs='?',
                     help='Output directory to store the output')
-parser.add_argument('embedding', type=pathtype.Path(readable=True), nargs='?', default='/workspace/embedding',
+parser.add_argument('--embeddings', type=pathtype.Path(readable=True), nargs='?', default='/workspace/embeddings',
                     help='The directory where embeddings are stored')
 parser.add_argument('-e', '--epochs', type=int, nargs='?', default=5,
                     help='Number of epochs to train the model')
-
 args = parser.parse_args()
+
+if args.output is None:
+    args.output = args.input
+
+if '/' not in args.output:
+    args.output = os.path.join(args.input, args.output)
+
 os.makedirs(args.output, exist_ok=True)
+if not os.path.isdir(args.output) or not os.access(args.output, os.W_OK):
+    print("output folder does not exits or is not writable")
+    exit(1)
 
 print("Hi, I'm DeepMatcher entrypoint!")
 print("Input taken from: ", args.input)
@@ -41,7 +49,7 @@ datasets = dm.data.process(path=args.output,
                            left_prefix='tableA_',
                            right_prefix='tableB_',
                            cache=None,
-                           embeddings_cache_path=args.embedding)
+                           embeddings_cache_path=args.embeddings)
 
 train, valid, test = datasets[0], datasets[1], datasets[2] if len(datasets) >= 3 else None
 

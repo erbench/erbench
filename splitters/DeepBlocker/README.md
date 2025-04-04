@@ -18,7 +18,7 @@ The produced output will include two files, and the split by recall value provid
 
 ## How to use
 
-IMPORTANT! `/workspace/embedding` should be mounted with `wiki.en.bin` embeddings inside.
+IMPORTANT! `/workspace/embeddings` should be mounted with `wiki.en.bin` embeddings inside.
 
 You can directly execute the docker image as following:
 
@@ -40,8 +40,8 @@ docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/outpu
 ```bash
 mkdir -p ../../apptainer ../../output
 apptainer build ../../apptainer/splitter_deepblocker.sif container.def
-srun --gpus=1 -p ampere apptainer run ../../apptainer/splitter_deepblocker.sif ../../datasets/d2_abt_buy/ db_split ../../embedding/
+srun --gpus=1 -p ampere apptainer run ../../apptainer/splitter_deepblocker.sif ../../datasets/d2_abt_buy/ ../../output/split_deepblocker/ --embeddings ../../embeddings/
 
 # dev mode with bind
-srun --gpus=1 -p ampere apptainer run --bind ./:/srv ../../apptainer/splitter_deepblocker.sif ../../datasets/d2_abt_buy/ db_split ../../embedding/
+srun --gpus=1 -p ampere apptainer run --bind ./:/srv ../../apptainer/splitter_deepblocker.sif ../../datasets/d2_abt_buy/ ../../output/split_deepblocker/ --embeddings ../../embeddings/
 ```

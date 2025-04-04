@@ -9,7 +9,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Download the pre-trained model on English Wikipedia
-# ADD https://zenodo.org/record/6466387/files/wiki.en.bin /workspace/embedding/wiki.en.bin
+# ADD https://zenodo.org/record/6466387/files/wiki.en.bin /workspace/embeddings/wiki.en.bin
 
 COPY fork-deepmatcher .
 COPY entrypoint.py .

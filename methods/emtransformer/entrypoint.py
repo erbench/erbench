@@ -18,7 +18,7 @@ import torch
 parser = argparse.ArgumentParser(description='Benchmark a dataset with a method')
 parser.add_argument('input', type=pathtype.Path(readable=True), nargs='?', default='/data',
                     help='Input directory containing the dataset')
-parser.add_argument('output', type=str, nargs='?', default='/data/output',
+parser.add_argument('output', type=str, nargs='?',
                     help='Output directory to store the output')
 parser.add_argument('-s', '--seed', type=int, nargs='?', default=random.randint(0, 4294967295),
                     help='The random state used to initialize the algorithms and split dataset')
@@ -26,9 +26,18 @@ parser.add_argument('-e', '--epochs', type=int, nargs='?', default=5,  # 15.0
                     help='Number of epochs to train the model')
 parser.add_argument('-lm', '--languagemodel', type=str, nargs='?', default='RoBERTa',
                     help='The language model to use', choices=['BERT', 'RoBERTa', 'DistilBERT', 'XLNet', 'XLM', 'ALBERT'])
-
 args = parser.parse_args()
+
+if args.output is None:
+    args.output = args.input
+
+if '/' not in args.output:
+    args.output = os.path.join(args.input, args.output)
+
 os.makedirs(args.output, exist_ok=True)
+if not os.path.isdir(args.output) or not os.access(args.output, os.W_OK):
+    print("output folder does not exits or is not writable")
+    exit(1)
 
 print("Hi, I'm EMTransformer entrypoint!")
 print("Input taken from: ", args.input)

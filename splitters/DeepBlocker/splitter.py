@@ -109,9 +109,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Splits the dataset using DeepBlocker method')
     parser.add_argument('input', type=pathtype.Path(readable=True), nargs='?', default='/data',
                         help='Input directory containing the dataset')
-    parser.add_argument('output', type=str, nargs='?', default='db_split',
+    parser.add_argument('output', type=str, nargs='?',
                         help='Output directory to store the output. If not provided, the input directory will be used')
-    parser.add_argument('embedding', type=pathtype.Path(readable=True), nargs='?', default='/workspace/embedding',
+    parser.add_argument('--embeddings', type=pathtype.Path(readable=True), nargs='?', default='/workspace/embeddings',
                     help='The directory where embeddings are stored')
     parser.add_argument('-r', '--recall', type=float, nargs='?', default=0.9,
                         help='The recall value for the train set')
@@ -150,7 +150,7 @@ if __name__ == "__main__":
     dataset = dataset_folder.split('_')[0]
     settings = dataset_settings[args.recall][dataset]
 
-    train, valid, test = split_input(str(args.embedding), tableA_df, tableB_df, matches_df, seed=random.randint(0, 4294967295), settings=settings, valid=True)
+    train, valid, test = split_input(str(args.embeddings), tableA_df, tableB_df, matches_df, seed=random.randint(0, 4294967295), settings=settings, valid=True)
     print("Done! Train size: {}, test size: {}.".format(train.shape[0], test.shape[0]))
 
 

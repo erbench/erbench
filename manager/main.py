@@ -14,10 +14,28 @@ from erbench.importer import import_results, import_slurm_metrics, import_predic
 
 DATASETS_DIR = os.getenv("DATASETS_DIR", "../datasets")
 CONTAINERS_DIR = os.getenv("CONTAINERS_DIR", "../apptainer")
+EMBEDDINGS_DIR = os.getenv("EMBEDDINGS_DIR", "../embeddings")
 TEMP_DIR = os.getenv("TEMP_DIR", "../running_jobs")
+SLURM_JOB_ARGS = os.getenv("SLURM_JOB_ARGS", "")
 
 # loads configuration from .env file
 erbench_client = ErbenchClient()
+
+
+def is_gpu_required(algoCode: str) -> bool:
+    if algoCode in ['splitter_random', 'magellan', 'zeroer']:
+        return False
+    return True
+
+
+def is_embeddings_required(algoCode: str) -> bool:
+    if algoCode in ['deepmatcher', 'hiermatcher', 'splitter_deepblocker']:
+        return True
+    return False
+
+
+def render_params(params: dict) -> str:
+    return ' '.join([f'--{k}' if v is True else f'--{k}="{v}"' if isinstance(v, str) and ' ' in v else f'--{k}={v}' for k, v in params.items() if v is not None])
 
 
 def import_job(job_id: str, input_dir: any, slurm_job_id: int = None):
@@ -29,7 +47,7 @@ def import_job(job_id: str, input_dir: any, slurm_job_id: int = None):
             print(f"Retrieving Slurm metrics for job {slurm_job_id}")
             process = subprocess.run(['sacct', '-j', str(slurm_job_id), '--json'], capture_output=True, text=True)
             if process.returncode == 0:
-                slurm_job_str = process.stdout
+                slurm_job_str = process.stdout.replace('\n', '').strip()
             else:
                 print(f"Warning: Failed to retrieve Slurm metrics: {process.stderr}")
         except Exception as e:
@@ -78,28 +96,53 @@ def start_job(job: Job):
         # for item in os.listdir(dataset_path):
         #     shutil.copy2(os.path.join(dataset_path, item), os.path.join(job_dir, item))
 
-        filtering_params_str = ' '.join([f'--{k}={v}' for k, v in job['filteringParams'].items()])
-        print(f"Starting filtering job {job['filteringAlgo']['code']} with params: {filtering_params_str}")
-        filtering_cmd = f"sbatch --parsable -p ampere --gpus=1 -o {job_dir}/filtering.out -e {job_dir}/filtering.err "
-        filtering_cmd += f"--wrap=\"apptainer run {filtering_container} {dataset_path} {job_dir} {filtering_params_str}\""
+        filtering_params = job['filteringParams']
+        if is_embeddings_required(job['filteringAlgo']['code']):
+            filtering_params['embeddings'] = EMBEDDINGS_DIR
+        filtering_params_str = render_params(filtering_params)
 
+        filtering_slurm_params = {
+            'job-name': f"erbench_filtering_{job['id']}",
+            'parsable': True,
+            'gpus': '1' if is_gpu_required(job['filteringAlgo']['code']) else None,
+            'output': os.path.join(job_dir, 'filtering.out'),
+            'error': os.path.join(job_dir, 'filtering.err'),
+            'wrap': f'apptainer run {filtering_container} {dataset_path} {job_dir} {filtering_params_str}'
+        }
+        filtering_cmd = f"sbatch {SLURM_JOB_ARGS} {render_params(filtering_slurm_params)}"
+        print(f"Filtering command: {filtering_cmd}")
+
+        print(f"Starting filtering job {job['filteringAlgo']['code']} with params: {filtering_params_str}")
         process = subprocess.run(filtering_cmd, shell=True, capture_output=True, text=True)
         if process.returncode != 0:
             raise RuntimeError(f"Error running filtering job: {process.stderr}")
 
-        filtering_job_id = process.stdout.strip()
+        filtering_job_id = int(process.stdout.strip())
         print(f"Filtering job submitted with ID: {filtering_job_id}")
 
-        matching_params_str = ' '.join([f'--{k}={v}' for k, v in job['matchingParams'].items()])
-        print(f"Starting matching job {job['matchingAlgo']['code']} with params: {matching_params_str}")
-        matching_cmd = f"sbatch --parsable -p ampere --gpus=1 -o {job_dir}/matching.out -e {job_dir}/matching.err --dependency=afterok:{filtering_job_id}"
-        matching_cmd += f"--wrap=\"apptainer run {matching_container} {job_dir} {matching_params_str}\""
+        matching_params = job['matchingParams']
+        if is_embeddings_required(job['matchingAlgo']['code']):
+            matching_params['embeddings'] = EMBEDDINGS_DIR
+        matching_params_str = render_params(matching_params)
 
+        matching_slurm_params = {
+            'job-name': f"erbench_matching_{job['id']}",
+            'parsable': True,
+            'gpus': '1' if is_gpu_required(job['matchingAlgo']['code']) else None,
+            'output': os.path.join(job_dir, 'matching.out'),
+            'error': os.path.join(job_dir, 'matching.err'),
+            'dependency': f"afterok:{filtering_job_id}",
+            'wrap': f'apptainer run {matching_container} {job_dir} {matching_params_str}'
+        }
+        matching_cmd = f"sbatch {SLURM_JOB_ARGS} {render_params(matching_slurm_params)}"
+        print(f"Matching command: {matching_cmd}")
+
+        print(f"Starting matching job {job['matchingAlgo']['code']} with params: {matching_params_str}")
         process = subprocess.run(matching_cmd, shell=True, capture_output=True, text=True)
         if process.returncode != 0:
             raise RuntimeError(f"Error running matching job: {process.stderr}")
 
-        matching_job_id = process.stdout.strip()
+        matching_job_id = int(process.stdout.strip())
         print(f"Matching job submitted with ID: {matching_job_id}")
 
         erbench_client.update_job(job['id'], JobStatus.RUNNING, filtering_job_id, matching_job_id)
@@ -113,16 +156,16 @@ def check_job(job: Job):
     matching_job_id = job['matchingSlurmId']
 
     try:
-        filtering_process = subprocess.run(['sacct', '-j', str(filtering_job_id), '--format=State'], capture_output=True, text=True)
+        filtering_process = subprocess.run(['sacct', '-j', str(filtering_job_id), '--format=State', '--parsable2', '--noheader'], capture_output=True, text=True)
         if filtering_process.returncode != 0:
             raise RuntimeError(f"Error checking filtering job status: {filtering_process.stderr}")
 
-        matching_process = subprocess.run(['sacct', '-j', str(matching_job_id), '--format=State'], capture_output=True, text=True)
+        matching_process = subprocess.run(['sacct', '-j', str(matching_job_id), '--format=State', '--parsable2', '--noheader'], capture_output=True, text=True)
         if matching_process.returncode != 0:
             raise RuntimeError(f"Error checking matching job status: {matching_process.stderr}")
 
-        filtering_status = filtering_process.stdout.strip().split('\n')[-1]
-        matching_status = matching_process.stdout.strip().split('\n')[-1]
+        filtering_status = filtering_process.stdout.strip().split('\n')[0]
+        matching_status = matching_process.stdout.strip().split('\n')[0]
 
         print(f"Filtering job {filtering_job_id} status: {filtering_status}")
         print(f"Matching job {matching_job_id} status: {matching_status}")
@@ -131,6 +174,14 @@ def check_job(job: Job):
             job_dir = get_job_directory(job['id'])
             print(f"Importing results for job {job['id']} from {job_dir}")
             import_job(job['id'], job_dir, matching_job_id)
+
+            # Clean up the job directory after successful import
+            print(f"Cleaning up job directory: {job_dir}")
+            try:
+                shutil.rmtree(job_dir)
+                print(f"Job directory {job_dir} removed successfully")
+            except Exception as e:
+                print(f"Warning: Failed to remove job directory: {str(e)}")
         elif filtering_status == 'FAILED' or matching_status == 'FAILED':
             erbench_client.update_job(job['id'], JobStatus.FAILED)
             print(f"Job {job['id']} failed")

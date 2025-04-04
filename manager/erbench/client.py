@@ -100,15 +100,19 @@ class ErbenchClient:
         else:
             return []
 
-    def update_job(self, job_id: str, status: JobStatus, filtering_slurm_id = None, matching_slurm_id = None) -> requests.Response:
+    def update_job(self, job_id: str, status: JobStatus, filtering_slurm_id: int = None, matching_slurm_id: int = None) -> requests.Response:
         url = f"{self.base_url}/api/jobs/{job_id}"
         headers = self._get_headers()
 
-        response = requests.put(url, headers=headers, json={
+        payload = {
             "status": status.value,
-            "filteringSlurmId": filtering_slurm_id,
-            "matchingSlurmId": matching_slurm_id,
-        })
+        }
+        if filtering_slurm_id is not None:
+            payload["filteringSlurmId"] = filtering_slurm_id
+        if matching_slurm_id is not None:
+            payload["matchingSlurmId"] = matching_slurm_id
+
+        response = requests.put(url, headers=headers, json=payload)
         response.raise_for_status()
         return response
 

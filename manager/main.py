@@ -10,8 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from erbench.client import ErbenchClient, JobStatus, Job
-from erbench.importer import import_results, import_slurm_metrics
-from manager.erbench.importer import import_predictions
+from erbench.importer import import_results, import_slurm_metrics, import_predictions
 
 DATASETS_DIR = os.getenv("DATASETS_DIR", "../datasets")
 CONTAINERS_DIR = os.getenv("CONTAINERS_DIR", "../apptainer")
@@ -143,7 +142,6 @@ def run_job():
     jobs = erbench_client.get_jobs()
     for job in jobs:
         try:
-            print(f"Job: {json.dumps(job)}")
             if job['status'] == JobStatus.PENDING:
                 print(f"Starting job {job['id']}")
                 start_job(job)

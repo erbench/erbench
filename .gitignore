@@ -16,3 +16,4 @@ slurm*.out
 /apptainer
 /input
 /output
+/running_jobs

@@ -26,20 +26,20 @@ wget https://zenodo.org/record/6466387/files/wiki.en.bin -O embedding/wiki.en.bi
 
 ### Splitters
 
-| Name                                             | Container  |
-|--------------------------------------------------|------------|
-| [Random Split](splitters/random-split/README.md) | ok, no GPU |
-| [DeepBlocker](splitters/DeepBlocker/README.md)   | ok         |
-| [KNN-Join](splitters/KNN-Join/README.md)         | ?          |
+| Name                                           | Container  |
+| ---------------------------------------------- | ---------- |
+| [Random Split](splitters/Random/README.md)     | ok, no GPU |
+| [DeepBlocker](splitters/DeepBlocker/README.md) | ok         |
+| [KNN-Join](splitters/KNN-Join/README.md)       | ?          |
 
 ### Matchers
 
-| Name                                             | Container  | Input params (exposed to UI)                                                                   | Metrics columns                                     | Predictions columns                      |
-|--------------------------------------------------|------------|------------------------------------------------------------------------------------------------|-----------------------------------------------------|------------------------------------------|
-| [deepmatcher](methods/deepmatcher/README.md)     | ok         | input, output, embedding, --epochs                                                             | f1, precision, recall, train_time, eval_time        | tableA_id, tableB_id, label, prob_class1 |
+| Name                                             | Container  | Input params (exposed to UI)                                                                   | Metrics columns                                         | Predictions columns                      |
+| ------------------------------------------------ | ---------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------- |
+| [deepmatcher](methods/deepmatcher/README.md)     | ok         | input, output, embedding, --epochs                                                             | f1, precision, recall, train_time, eval_time            | tableA_id, tableB_id, label, prob_class1 |
 | [ditto](methods/ditto/README.md)                 | ok         | input, output, --epochs, --seed, --languagemodel=RoBERTa\|DistilBERT                           | f1, precision, recall, train_time, eval_time            | tableA_id, tableB_id, label, prob_class1 |
-| [emtransformer](methods/emtransformer/README.md) | ok         | input, output, --epochs, --seed, --languagemodel=BERT\|RoBERTa\|DistilBERT\|XLNet\|XLM\|ALBERT | f1, precision, recall, train_time, eval_time        | tableA_id, tableB_id, label, prob_class1 |
-| [gnem](methods/gnem/README.md)                   | ok         | input, output, --epochs, --seed, --languagemodel=BERT\|RoBERTa\|DistilBERT\|XLNet\|XLM\|ALBERT | f1, precision, recall, train_time, eval_time        | tableA_id, tableB_id, label, prob_class1 |
-| [hiermatcher](methods/hiermatcher/README.md)     | ok         | input, output, embedding, --epochs, --seed                                                     | f1, precision, recall, train_time, eval_time        | tableA_id, tableB_id, label, prob_class1 |
-| [magellan](methods/magellan/README.md)           | ok, no GPU | input, output, --seed, --method=DecisionTree\|SVM\|RF\|LogReg\|LinReg\|NaiveBayes              | f1, precision, recall, train_time, eval_time        | tableA_id, tableB_id, label, prob_class1 |
+| [emtransformer](methods/emtransformer/README.md) | ok         | input, output, --epochs, --seed, --languagemodel=BERT\|RoBERTa\|DistilBERT\|XLNet\|XLM\|ALBERT | f1, precision, recall, train_time, eval_time            | tableA_id, tableB_id, label, prob_class1 |
+| [gnem](methods/gnem/README.md)                   | ok         | input, output, --epochs, --seed, --languagemodel=BERT\|RoBERTa\|DistilBERT\|XLNet\|XLM\|ALBERT | f1, precision, recall, train_time, eval_time            | tableA_id, tableB_id, label, prob_class1 |
+| [hiermatcher](methods/hiermatcher/README.md)     | ok         | input, output, embedding, --epochs, --seed                                                     | f1, precision, recall, train_time, eval_time            | tableA_id, tableB_id, label, prob_class1 |
+| [magellan](methods/magellan/README.md)           | ok, no GPU | input, output, --seed, --method=DecisionTree\|SVM\|RF\|LogReg\|LinReg\|NaiveBayes              | f1, precision, recall, train_time, eval_time            | tableA_id, tableB_id, label, prob_class1 |
 | [zeroer](methods/zeroer/README.md)               | ok, no GPU | input, output, --full                                                                          | f1, precision, recall, train_time (always 0), eval_time | tableA_id, tableB_id, label, prob_class1 |

@@ -20,9 +20,9 @@ The produced output will include two files, and the split by recall value provid
 
 ```bash
 mkdir -p ../../apptainer ../../output
-apptainer build ../../apptainer/knn-join.sif container.def
-srun --gpus=0 -p ampere apptainer run ../../apptainer/knn-join.sif ../../datasets/d2_abt_buy/ kj_split
+apptainer build ../../apptainer/splitter_knnjoin.sif container.def
+srun --gpus=0 -p ampere apptainer run ../../apptainer/splitter_knnjoin.sif ../../datasets/d2_abt_buy/ kj_split
 
 # dev mode with bind
-srun --gpus=0 -p ampere apptainer run --bind ./:/srv ../../apptainer/knn-join.sif ../../datasets/d2_abt_buy/ kj_split
+srun --gpus=0 -p ampere apptainer run --bind ./:/srv ../../apptainer/splitter_knnjoin.sif ../../datasets/d2_abt_buy/ kj_split
 ```

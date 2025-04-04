@@ -39,9 +39,9 @@ docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/outpu
 
 ```bash
 mkdir -p ../../apptainer ../../output
-apptainer build ../../apptainer/deepblocker.sif container.def
-srun --gpus=1 -p ampere apptainer run ../../apptainer/deepblocker.sif ../../datasets/d2_abt_buy/ db_split ../../embedding/
+apptainer build ../../apptainer/splitter_deepblocker.sif container.def
+srun --gpus=1 -p ampere apptainer run ../../apptainer/splitter_deepblocker.sif ../../datasets/d2_abt_buy/ db_split ../../embedding/
 
 # dev mode with bind
-srun --gpus=1 -p ampere apptainer run --bind ./:/srv ../../apptainer/deepblocker.sif ../../datasets/d2_abt_buy/ db_split ../../embedding/
+srun --gpus=1 -p ampere apptainer run --bind ./:/srv ../../apptainer/splitter_deepblocker.sif ../../datasets/d2_abt_buy/ db_split ../../embedding/
 ```

@@ -64,7 +64,7 @@ class Metrics(TypedDict, total=False):
     totalRuntime: Optional[int]
 
 
-class JobStatus(Enum):
+class JobStatus(str, Enum):
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"

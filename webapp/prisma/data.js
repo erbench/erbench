@@ -1,8 +1,8 @@
 export const algorithms = [
   // splitters
-  {code: 'random', name: 'Random Split', scenarios: ['filtering'], params: ['recall']},
-  {code: 'deepblocker', name: 'DeepBlocker', scenarios: ['filtering'], params: ['recall']},
-  {code: 'knnjoin', name: 'top kNN-Join', scenarios: ['filtering'], params: ['recall']},
+  {code: 'splitter_random', name: 'Random Split', scenarios: ['filtering'], params: ['recall']},
+  {code: 'splitter_deepblocker', name: 'DeepBlocker', scenarios: ['filtering'], params: ['recall']},
+  {code: 'splitter_knnjoin', name: 'top kNN-Join', scenarios: ['filtering'], params: ['recall']},
   // matchers
   {code: 'deepmatcher', name: 'DeepMatcher', scenarios: ['matching'], params: ['epochs']},
   {code: 'ditto', name: 'DITTO', scenarios: ['matching'], params: ['epochs']},

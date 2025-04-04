@@ -118,24 +118,24 @@ export default function ViewJob({job}) {
           <div className="flex flex-column gap-2">
             <div className="flex justify-content-between">
               <span className="font-medium">Dataset:</span>
-              <span>{job.dataset.name}</span>
+              <span className="white-space-nowrap">{job.dataset.name}</span>
             </div>
             <div className="flex justify-content-between">
               <span className="font-medium">Filtering Algorithm:</span>
-              <span>{job.filteringAlgo.name}</span>
+              <span className="white-space-nowrap">{job.filteringAlgo.name}</span>
             </div>
             <div className="flex justify-content-between">
               <span className="font-medium">Matching Algorithm:</span>
-              <span>{job.matchingAlgo.name}</span>
+              <span className="white-space-nowrap">{job.matchingAlgo.name}</span>
             </div>
             <div className="flex justify-content-between">
               <span className="font-medium">Created:</span>
-              <span>{new Date(job.createdAt).toISOString()}</span>
+              <span className="white-space-nowrap">{new Date(job.createdAt).toISOString()}</span>
             </div>
             {job.result && (
               <div className="flex justify-content-between">
                 <span className="font-medium">Completed At:</span>
-                <span>{new Date(job.result.createdAt).toISOString()}</span>
+                <span className="white-space-nowrap">{new Date(job.result.createdAt).toISOString()}</span>
               </div>
             )}
           </div>
@@ -145,31 +145,31 @@ export default function ViewJob({job}) {
             {job.filteringParams.recall && (
               <div className="flex justify-content-between">
                 <span className="font-medium">Filtering Recall:</span>
-                <span>{job.filteringParams.recall}</span>
+                <span className="white-space-nowrap">{job.filteringParams.recall}</span>
               </div>
             )}
             {job.filteringParams.epochs && (
               <div className="flex justify-content-between">
                 <span className="font-medium">Filtering Epochs:</span>
-                <span>{job.filteringParams.epochs}</span>
+                <span className="white-space-nowrap">{job.filteringParams.epochs}</span>
               </div>
             )}
             {job.matchingParams.recall && (
               <div className="flex justify-content-between">
                 <span className="font-medium">Matching Recall:</span>
-                <span>{job.matchingParams.recall}</span>
+                <span className="white-space-nowrap">{job.matchingParams.recall}</span>
               </div>
             )}
             {job.matchingParams.epochs && (
               <div className="flex justify-content-between">
                 <span className="font-medium">Matching Epochs:</span>
-                <span>{job.matchingParams.epochs}</span>
+                <span className="white-space-nowrap">{job.matchingParams.epochs}</span>
               </div>
             )}
             {job.notifyEmail && (
               <div className="flex justify-content-between">
                 <span className="font-medium">Notification Email:</span>
-                <span>{job.notifyEmail}</span>
+                <span className="white-space-nowrap">{job.notifyEmail}</span>
               </div>
             )}
           </div>
@@ -230,7 +230,7 @@ export default function ViewJob({job}) {
               )}
               {job.result.memUtilized !== null && (
                 <div className="flex justify-content-between">
-                  <span className="font-medium">Memory Usage:</span>
+                  <span className="font-medium">CPU Memory:</span>
                   <span>{(Number(job.result.memUtilized) / 1024 / 1024 / 1024).toFixed(2)} GB</span>
                 </div>
               )}

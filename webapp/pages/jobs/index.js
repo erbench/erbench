@@ -7,7 +7,7 @@ import Link from 'next/link';
 import Head from "next/head";
 
 import prisma from "../../prisma/client";
-import {dropdownFilterTemplate, renderDate, renderParams, renderStatusTemplate, statusRowFilterTemplate} from "../../utils/jobUtils";
+import {dropdownFilterTemplate, renderDate, renderParams, renderNameAndParams, renderResults, renderStatusTemplate, statusRowFilterTemplate} from "../../utils/jobUtils";
 
 export const getServerSideProps = async (context) => {
   const {email} = context.query || {};
@@ -27,6 +27,7 @@ export const getServerSideProps = async (context) => {
       filteringAlgo: true,
       matchingAlgo: true,
       dataset: true,
+      result: true,
     }
   });
 
@@ -117,12 +118,11 @@ export default function ListJobs({jobs, filterEmail}) {
                 filter showFilterMenu={false} filterElement={(options) => statusRowFilterTemplate(options, statusOptions)}/>
         <Column field="dataset.name" header="Dataset" sortable
                 filter showFilterMenu={false} filterElement={(options) => dropdownFilterTemplate(options, datasetOptions)}/>
-        <Column field="filteringAlgo.name" header="Filtering Algorithm" sortable
+        <Column body={(row) => renderNameAndParams(row.filteringAlgo.name, row.filteringParams)} field="filteringAlgo.name" header="Filtering Algorithm" sortable
                 filter showFilterMenu={false} filterElement={(options) => dropdownFilterTemplate(options, filteringAlgoOptions)}/>
-        <Column body={(row) => renderParams(row.filteringParams)} header="Filtering Params"/>
-        <Column field="matchingAlgo.name" header="Matching Algorithm" sortable
+        <Column body={(row) => renderNameAndParams(row.matchingAlgo.name, row.matchingParams)} field="matchingAlgo.name" header="Matching Algorithm" sortable
                 filter showFilterMenu={false} filterElement={(options) => dropdownFilterTemplate(options, matchingAlgoOptions)}/>
-        <Column body={(row) => renderParams(row.matchingParams)} header="Matching Params"/>
+        <Column body={(row) => renderResults(row.result)} header="Matching Performance"/>
         <Column field="createdAt" header="Created" sortable body={(row) => renderDate(row.createdAt)}/>
       </DataTable>
     </div>

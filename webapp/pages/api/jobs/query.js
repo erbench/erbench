@@ -12,7 +12,7 @@ export async function queryJobs(params) {
   const sortOrder = parseInt(params.sortOrder) === -1 || (typeof params.sortOrder === 'string' && params.sortOrder?.toLowerCase() === 'desc') ? 'desc' : 'asc';
 
   const whereClause = {
-    status: {in: ['pending', 'running']},
+    status: {in: ['pending', 'queued', 'filtering', 'matching']},
   };
 
   if (params.filters) {

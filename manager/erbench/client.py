@@ -66,7 +66,9 @@ class Metrics(TypedDict, total=False):
 
 class JobStatus(str, Enum):
     PENDING = "pending"
-    RUNNING = "running"
+    QUEUED = "queued"
+    FILTERING = "filtering"
+    MATCHING = "matching"
     COMPLETED = "completed"
     FAILED = "failed"
 

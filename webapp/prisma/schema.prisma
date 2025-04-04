@@ -50,7 +50,9 @@ model Algorithm {
 
 enum Status {
   pending
-  running
+  queued
+  filtering
+  matching
   completed
   failed
 }
@@ -77,7 +79,7 @@ model Job {
 
 // the model should share id with Jobs
 model Result {
-  job   Job    @relation(fields: [jobId], references: [id])
+  job   Job    @relation(fields: [jobId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   jobId String @id
 
   // scores
@@ -101,7 +103,7 @@ model Result {
 }
 
 model Predictions {
-  job   Job    @relation(fields: [jobId], references: [id])
+  job   Job    @relation(fields: [jobId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   jobId String
 
   tableA_id   BigInt

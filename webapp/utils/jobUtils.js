@@ -5,8 +5,10 @@ import {Dropdown} from "primereact/dropdown";
 
 const getSeverity = (status) => {
   const severityMap = {
-    pending: 'info',
-    running: 'warning',
+    pending: 'secondary',
+    queued: 'info',
+    filtering: 'warning',
+    matching: 'warning',
     completed: 'success',
     failed: 'danger'
   };

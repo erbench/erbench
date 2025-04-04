@@ -145,8 +145,8 @@ def start_job(job: Job):
         matching_job_id = int(process.stdout.strip())
         print(f"Matching job submitted with ID: {matching_job_id}")
 
-        erbench_client.update_job(job['id'], JobStatus.RUNNING, filtering_job_id, matching_job_id)
-        print(f"Job {job['id']} updated to RUNNING status with filtering job ID {filtering_job_id} and matching job ID {matching_job_id}")
+        erbench_client.update_job(job['id'], JobStatus.QUEUED, filtering_job_id, matching_job_id)
+        print(f"Job {job['id']} updated to QUEUED status with filtering job ID {filtering_job_id} and matching job ID {matching_job_id}")
     except Exception as e:
         print(f"Error executing job: {str(e)}")
 
@@ -170,7 +170,13 @@ def check_job(job: Job):
         print(f"Filtering job {filtering_job_id} status: {filtering_status}")
         print(f"Matching job {matching_job_id} status: {matching_status}")
 
-        if filtering_status == 'COMPLETED' and matching_status == 'COMPLETED':
+        if filtering_status == 'RUNNING':
+            erbench_client.update_job(job['id'], JobStatus.FILTERING)
+            return
+        elif matching_status == 'RUNNING':
+            erbench_client.update_job(job['id'], JobStatus.MATCHING)
+            return
+        elif filtering_status == 'COMPLETED' and matching_status == 'COMPLETED':
             job_dir = get_job_directory(job['id'])
             print(f"Importing results for job {job['id']} from {job_dir}")
             import_job(job['id'], job_dir, matching_job_id)
@@ -196,7 +202,7 @@ def run_job():
             if job['status'] == JobStatus.PENDING:
                 print(f"Starting job {job['id']}")
                 start_job(job)
-            elif job['status'] == JobStatus.RUNNING:
+            elif job['status'] == JobStatus.QUEUED or job['status'] == JobStatus.FILTERING or job['status'] == JobStatus.MATCHING:
                 print(f"Checking job {job['id']}")
                 check_job(job)
         except Exception as e:

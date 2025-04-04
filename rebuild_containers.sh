@@ -16,7 +16,7 @@ METHODS=(
 )
 
 COMMAND="apptainer build --force"
-MAX_PARALLEL=10
+MAX_PARALLEL=5
 
 log() {
     local timestamp=$(date "+%Y-%m-%d %H:%M:%S");

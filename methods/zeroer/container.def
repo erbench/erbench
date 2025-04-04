@@ -23,5 +23,8 @@ From: python:3.7
     cd /srv
     pip install --no-cache-dir -r requirements.txt -r fork-zeroer/requirements.txt
 
+%environment
+    export PYTHONPATH="${PYTHONPATH}:/srv/fork-zeroer"
+
 %runscript
     exec python -u /srv/entrypoint.py "$@"

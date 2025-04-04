@@ -26,8 +26,8 @@ docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/outpu
 ```bash
 mkdir -p ../../apptainer ../../output/hiermatcher
 apptainer build ../../apptainer/hiermatcher.sif container.def
-srun -p ampere --gpus=1 apptainer run ../../apptainer/hiermatcher.sif ../../datasets/d2_abt_buy/ ../../output/hiermatcher/ --embeddings ../../embeddings/
+srun -p ampere --gpus=1 apptainer run ../../apptainer/hiermatcher.sif ../../datasets/d2_abt_buy/ ../../output/hiermatcher/ --embeddings=../../embeddings/
 
 # dev mode with bind
-srun -p ampere --gpus=1 apptainer run --bind ./:/srv ../../apptainer/hiermatcher.sif ../../datasets/d2_abt_buy/ ../../output/hiermatcher/ --embeddings ../../embeddings/
+srun -p ampere --gpus=1 apptainer run --bind ./:/srv ../../apptainer/hiermatcher.sif ../../datasets/d2_abt_buy/ ../../output/hiermatcher/ --embeddings=../../embeddings/
 ```

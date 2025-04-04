@@ -23,5 +23,8 @@ From: pytorch/pytorch:1.10.0-cuda11.3-cudnn8-runtime
     cd /srv
     pip install --no-cache-dir -r requirements.txt
 
+%environment
+    export PYTHONPATH="${PYTHONPATH}:/srv/fork-deepmatcher"
+
 %runscript
     exec python -u /srv/entrypoint.py  "$@"

@@ -19,5 +19,8 @@ From: pytorch/pytorch:1.7.1-cuda11.0-cudnn8-runtime
     cd /srv
     pip install --no-cache-dir -r requirements.txt
 
+%environment
+    export PYTHONPATH="${PYTHONPATH}:/srv/fork-gnem"
+
 %runscript
     exec python -u /srv/entrypoint.py  "$@"

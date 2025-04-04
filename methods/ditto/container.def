@@ -26,5 +26,8 @@ From: pytorch/pytorch:1.9.1-cuda11.1-cudnn8-runtime
     python -m nltk.downloader stopwords
     mv /root/nltk_data /opt/conda/lib/nltk_data
 
+%environment
+    export PYTHONPATH="${PYTHONPATH}:/srv/fork-ditto"
+
 %runscript
     exec python -u /srv/entrypoint.py  "$@"

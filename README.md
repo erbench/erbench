@@ -26,11 +26,11 @@ wget https://zenodo.org/record/6466387/files/wiki.en.bin -O embeddings/wiki.en.b
 
 ### Splitters
 
-| Name                                           | Container  | Input params (exposed to UI)               |
-| ---------------------------------------------- | ---------- | ------------------------------------------ |
-| [Random Split](splitters/Random/README.md)     | ok, no GPU | input, output, --recall, --neg_pairs_ratio |
-| [DeepBlocker](splitters/DeepBlocker/README.md) | ok         | input, output, --embeddings, --recall      |
-| [KNN-Join](splitters/KNN-Join/README.md)       | ?          | input, output, --recall                    |
+| Name                                           | Container  | Input params (exposed to UI)                       |
+| ---------------------------------------------- |------------|----------------------------------------------------|
+| [Random Split](splitters/Random/README.md)     | ok, no GPU | input, output, --recall, --neg_pairs_ratio, --seed |
+| [DeepBlocker](splitters/DeepBlocker/README.md) | ok         | input, output, --embeddings, --recall, --seed      |
+| [KNN-Join](splitters/KNN-Join/README.md)       | ok, no GPU | input, output, --recall, --seed, --default         |
 
 ### Matchers
 

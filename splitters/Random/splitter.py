@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 from itertools import product
 from sklearn.model_selection import train_test_split
+import time
 
 
 def generate_candidates(tableA_df, tableB_df, matches_df, recall=0.7, neg_pairs_ratio=10, seed=1):
@@ -79,34 +80,29 @@ def generate_candidates(tableA_df, tableB_df, matches_df, recall=0.7, neg_pairs_
     pairs = pd.concat([pos_pairs, neg_pairs]).reset_index(drop=True)
     return pairs
 
-def get_stats(data, num_matches_total, name):
-    num = data.shape[0]
-    num_m = data['label'].sum()
-    r = data['label'].sum() / num_matches_total
-    p = data['label'].sum() / data.shape[0]
-    return [[name, num, num_m, p, r]]
-
 def split_input(tableA_df, tableB_df, matches_df, recall=0.9, neg_pairs_ratio=10, seed=1, valid=True):
     candidates = generate_candidates(tableA_df, tableB_df, matches_df, recall=recall,
                                      neg_pairs_ratio=neg_pairs_ratio, seed=seed)
+
+    # get statistics:
+    num_matches = matches_df.shape[0]
+    num_candidates = candidates.shape[0]
+    tp = candidates['label'].sum()
+    p = tp / num_candidates
+    r = tp / num_matches
+    f1 = 2 * p * r / (p + r)
+    stats = [f1, p, r, num_candidates]
+
     print("Candidates generated: ", candidates.shape[0])
-    stats = get_stats(candidates, matches_df.shape[0], 'candidates')
     if valid:
         train, test_valid = train_test_split(candidates, train_size=0.6, random_state=seed, shuffle=True,
                                              stratify=candidates['label'])
         valid, test = train_test_split(test_valid, train_size=0.5, random_state=seed, shuffle=True,
                                        stratify=test_valid['label'])
 
-        stats += get_stats(train, matches_df.shape[0], 'train')
-        stats += get_stats(valid, matches_df.shape[0], 'valid')
-        stats += get_stats(test, matches_df.shape[0], 'test')
-
-
         return train, valid, test, stats
     train, test = train_test_split(candidates, train_size=0.75,
                                    random_state=seed, shuffle=True, stratify=candidates['label'])
-    stats += get_stats(train, matches_df.shape[0], 'train')
-    stats += get_stats(test, matches_df.shape[0], 'test')
     return train, test, stats
 
 if __name__ == "__main__":
@@ -146,8 +142,10 @@ if __name__ == "__main__":
     print("Input tables are:", "A", tableA_df.shape, "B", tableB_df.shape, "Matches", matches_df.shape)
 
     # split the input datasets
+    start_time = time.process_time()
     train, valid, test, stats = split_input(tableA_df, tableB_df, matches_df, recall=args.recall,
                                      neg_pairs_ratio=args.neg_pairs_ratio, seed=args.seed)
+    stop_time = time.process_time()
     print("Done! Train size: {}, test size: {}.".format(train.shape[0], test.shape[0]))
 
     train.to_csv(path.join(args.output, "train.csv"), index=False)
@@ -158,13 +156,12 @@ if __name__ == "__main__":
     tableB_df.to_csv(os.path.join(args.output, 'tableB.csv'), index=False)
     matches_df.to_csv(os.path.join(args.output, 'matches.csv'), index=False)
 
-    f = open(os.path.join(args.output, 'split_statistics.txt'), 'w')
-    print('Dataset statistics:', file=f)
-    print(f'Entries Table A: {tableA_df.shape[0]}; Entries Table B: {tableB_df.shape[0]}', file=f)
-    print(f'Num Matches: {matches_df.shape[0]}', file=f)
-    print('Split Statistics:', file=f)
-    print(*['', 'Num Entries', 'Num Matches', 'Precision', 'Recall'], file=f, sep='\t')
-    for line in stats:
-        print(*line, file=f, sep= '\t')
-    f.close()
+    metrics_file = open(os.path.join(args.output, "filtering_metrics.txt"), 'w')
+    cols = ['f1', 'precision', 'recall', 'filtering_time', 'num_candidates', 'entries_tableA', 'entries_tableB',
+            'entries_matches']
+    stats = stats[:3] + [stop_time - start_time] + [stats[3]] + [tableA_df.shape[0], tableB_df.shape[0],
+                                                                 matches_df.shape[0]]
+    print(*cols, file=metrics_file, sep=',')
+    print(*stats, file=metrics_file, sep=',')
+    metrics_file.close()
 

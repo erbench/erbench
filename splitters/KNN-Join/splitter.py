@@ -14,6 +14,7 @@ from sklearn.model_selection import train_test_split
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import SnowballStemmer
+import time
 
 def clean_entry(entry, stemmer, stop_words):
     list_entries = word_tokenize(entry)
@@ -98,15 +99,25 @@ def generate_candidates(tableA_df, tableB_df, matches_df, settings):
 
 def split_input(tableA_df, tableB_df, matches_df, settings, seed = 1, valid=True):
     candidates = generate_candidates(tableA_df, tableB_df, matches_df, settings)
+
+    #get statistics:
+    num_matches = matches_df.shape[0]
+    num_candidates = candidates.shape[0]
+    tp = candidates['label'].sum()
+    p = tp / num_candidates
+    r = tp / num_matches
+    f1 = 2 * p * r / (p + r)
+    stats = [f1, p, r, num_candidates]
+
     print("Candidates generated: ", candidates.shape[0])
     if valid:
         train, test_valid = train_test_split(candidates, train_size=0.6, random_state=seed, shuffle=True,
                                              stratify=candidates['label'])
         valid, test = train_test_split(test_valid, train_size=0.5, random_state=seed, shuffle=True,
                                        stratify=test_valid['label'])
-        return (train, valid, test)
+        return train, valid, test, stats
 
-    return train_test_split(candidates, train_size=0.75, random_state=seed, shuffle=True, stratify=candidates['label'])
+    return train_test_split(candidates, train_size=0.75, random_state=seed, shuffle=True, stratify=candidates['label']), stats
 
 
 if __name__ == "__main__":
@@ -117,6 +128,8 @@ if __name__ == "__main__":
                         help='Output directory to store the output. If not provided, the input directory will be used')
     parser.add_argument('-r', '--recall', type=float, nargs='?', default=0.9,
                         help='The recall value for the train set')
+    parser.add_argument('-s', '--seed', type=int, nargs='?', default=random.randint(0, 4294967295),
+                        help='The random state used to initialize the algorithms and split dataset')
     args = parser.parse_args()
 
     if args.output is None:
@@ -148,14 +161,24 @@ if __name__ == "__main__":
     dataset = dataset_folder.split('_')[0]
     settings = dataset_settings[args.recall][dataset]
 
-    train, valid, test = split_input(tableA_df, tableB_df, matches_df,
-                                     seed=random.randint(0, 4294967295), settings=settings, valid=True)
+    start_time = time.process_time()
+    train, valid, test, stats = split_input(tableA_df, tableB_df, matches_df,
+                                     seed=args.seed, settings=settings, valid=True)
+    stop_time = time.process_time()
     print("Done! Train size: {}, test size: {}.".format(train.shape[0], test.shape[0]))
 
-    train.to_csv(os.path.join(output_folder, "train.csv"), index=False)
-    valid.to_csv(os.path.join(output_folder, "valid.csv"), index=False)
-    test.to_csv(os.path.join(output_folder, "test.csv"), index=False)
+    train.to_csv(os.path.join(args.output, "train.csv"), index=False)
+    valid.to_csv(os.path.join(args.output, "valid.csv"), index=False)
+    test.to_csv(os.path.join(args.output, "test.csv"), index=False)
 
-    tableA_df.to_csv(os.path.join(output_folder, "tableA.csv"), index=False)
-    tableB_df.to_csv(os.path.join(output_folder, "tableB.csv"), index=False)
-    matches_df.to_csv(os.path.join(output_folder, "matches.csv"), index=False)
+    tableA_df.to_csv(os.path.join(args.output, "tableA.csv"), index=False)
+    tableB_df.to_csv(os.path.join(args.output, "tableB.csv"), index=False)
+    matches_df.to_csv(os.path.join(args.output, "matches.csv"), index=False)
+
+    metrics_file = open(os.path.join(args.output, "filtering_metrics.txt"), 'w')
+    cols = ['f1', 'precision', 'recall', 'filtering_time', 'num_candidates', 'entries_tableA', 'entries_tableB', 'entries_matches']
+    stats = stats[:3] + [stop_time - start_time] + [stats[3]] + [tableA_df.shape[0], tableB_df.shape[0], matches_df.shape[0]]
+    print(*cols, file=metrics_file, sep=',')
+    print(*stats, file=metrics_file, sep=',')
+    metrics_file.close()
+

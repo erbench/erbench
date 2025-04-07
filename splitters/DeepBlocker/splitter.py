@@ -15,6 +15,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import SnowballStemmer
 from settings import dataset_settings
+import time
 
 def clean_entry(entry, stemmer, stop_words):
     try:
@@ -39,11 +40,7 @@ def generate_candidates(embedding_path, tableA_df, tableB_df, matches_df, settin
     cols_to_block = list(set(tableA_df.columns.tolist()) & set(tableB_df.columns.tolist()))
     cols_to_block.remove('id')
     print("Blocking columns: ", cols_to_block)
-    # tableA_df[cols_to_block] = tableA_df[cols_to_block].astype(str)
-    # tableB_df[cols_to_block] = tableB_df[cols_to_block].astype(str)
-    # for col in cols_to_block:
-    #     tableA_df[col] = tableA_df[col].str.replace('\t', ' ')
-    #     tableB_df[col] = tableB_df[col].str.replace('\t', ' ')
+
     block_A = tableA_df.copy()
     block_B = tableB_df.copy()
 
@@ -56,8 +53,6 @@ def generate_candidates(embedding_path, tableA_df, tableB_df, matches_df, settin
         snowball_stemmer = SnowballStemmer('english')
         block_A[cols_to_block] = block_A[cols_to_block].map(lambda x: clean_entry(x, snowball_stemmer, stop_words))
         block_B[cols_to_block] = block_B[cols_to_block].map(lambda x: clean_entry(x, snowball_stemmer, stop_words))
-
-    #golden_df = matches_df.rename(columns={'tableA_id': 'ltable_id', 'tableB_id': 'rtable_id'})
 
     tuple_embedding_model = AutoEncoderTupleEmbedding(embedding_path=embedding_path)
     topK_vector_pairing_model = ExactTopKVectorPairing(K=settings['K'])
@@ -72,13 +67,10 @@ def generate_candidates(embedding_path, tableA_df, tableB_df, matches_df, settin
         candidate_set_df['tableA_id'] = block_A['id'].to_numpy()[candidate_set_df['ltable_id'].to_numpy()]
         candidate_set_df['tableB_id'] = block_B['id'].to_numpy()[candidate_set_df['rtable_id'].to_numpy()]
 
-    #golden_df['label'] = 1
-    #candidate_set_df['label'] = 0
-    #pairs_df = pd.concat([golden_df, candidate_set_df]).drop_duplicates(subset=['ltable_id', 'rtable_id'], keep='first')
 
-    #Alternative Way for pairs_df (only keeps those true pairs, which were found in blocking)
+    # keep only those true pairs, which were found in blocking
     golden_set = set(matches_df.itertuples(index=False, name=None))
-    pairs_df = candidate_set_df[['tableA_id', 'tableB_id']]
+    pairs_df = candidate_set_df[['tableA_id', 'tableB_id']].copy()
     pairs_df['label'] = pairs_df.apply(lambda x: (x['tableA_id'], x['tableB_id']) in golden_set, axis=1).astype(int)
 
     ## Sanity Check:
@@ -96,13 +88,23 @@ def generate_candidates(embedding_path, tableA_df, tableB_df, matches_df, settin
 
 def split_input(embedding_path, tableA_df, tableB_df, matches_df, settings, seed=1, valid=True):
     candidates = generate_candidates(embedding_path, tableA_df, tableB_df, matches_df, settings)
+
+    # get statistics:
+    num_matches = matches_df.shape[0]
+    num_candidates = candidates.shape[0]
+    tp = candidates['label'].sum()
+    p = tp / num_candidates
+    r = tp / num_matches
+    f1 = 2 * p * r / (p + r)
+    stats = [f1, p, r, num_candidates]
+
     print("Candidates generated: ", candidates.shape[0])
     if valid:
         train, test_valid = train_test_split(candidates, train_size=0.6, random_state = seed, shuffle = True, stratify = candidates['label'])
         valid, test = train_test_split(test_valid, train_size=0.5, random_state = seed, shuffle = True, stratify = test_valid['label'])
-        return (train, valid, test)
+        return train, valid, test, stats
 
-    return train_test_split(candidates, train_size=0.75, random_state=seed, shuffle=True, stratify=candidates['label'])
+    return train_test_split(candidates, train_size=0.75, random_state=seed, shuffle=True, stratify=candidates['label']), stats
 
 
 if __name__ == "__main__":
@@ -115,6 +117,8 @@ if __name__ == "__main__":
                     help='The directory where embeddings are stored')
     parser.add_argument('-r', '--recall', type=float, nargs='?', default=0.9,
                         help='The recall value for the train set')
+    parser.add_argument('-s', '--seed', type=int, nargs='?', default=random.randint(0, 4294967295),
+                        help='The random state used to initialize the algorithms and split dataset')
     args = parser.parse_args()
 
     if args.output is None:
@@ -146,15 +150,24 @@ if __name__ == "__main__":
     dataset = dataset_folder.split('_')[0]
     settings = dataset_settings[args.recall][dataset]
 
-    train, valid, test = split_input(str(args.embeddings), tableA_df, tableB_df, matches_df, seed=random.randint(0, 4294967295), settings=settings, valid=True)
+    start_time = time.process_time()
+    train, valid, test, stats = split_input(str(args.embeddings), tableA_df, tableB_df, matches_df, seed=args.seed, settings=settings, valid=True)
+    stop_time = time.process_time()
     print("Done! Train size: {}, test size: {}.".format(train.shape[0], test.shape[0]))
 
 
 
-    train.to_csv(os.path.join(output_folder, "train.csv"), index=False)
-    valid.to_csv(os.path.join(output_folder, "valid.csv"), index=False)
-    test.to_csv(os.path.join(output_folder, "test.csv"), index=False)
+    train.to_csv(os.path.join(args.output, "train.csv"), index=False)
+    valid.to_csv(os.path.join(args.output, "valid.csv"), index=False)
+    test.to_csv(os.path.join(args.output, "test.csv"), index=False)
 
-    tableA_df.to_csv(os.path.join(output_folder, "tableA.csv"), index=False)
-    tableB_df.to_csv(os.path.join(output_folder, "tableB.csv"), index=False)
-    matches_df.to_csv(os.path.join(output_folder, "matches.csv"), index=False)
+    tableA_df.to_csv(os.path.join(args.output, "tableA.csv"), index=False)
+    tableB_df.to_csv(os.path.join(args.output, "tableB.csv"), index=False)
+    matches_df.to_csv(os.path.join(args.output, "matches.csv"), index=False)
+
+    metrics_file = open(os.path.join(args.output, "filtering_metrics.txt"), 'w')
+    cols = ['f1', 'precision', 'recall', 'filtering_time', 'num_candidates', 'entries_tableA', 'entries_tableB', 'entries_matches']
+    stats = stats[:3] + [stop_time - start_time] + [stats[3]] + [tableA_df.shape[0], tableB_df.shape[0], matches_df.shape[0]]
+    print(*cols, file=metrics_file, sep=',')
+    print(*stats, file=metrics_file, sep=',')
+    metrics_file.close()

@@ -130,6 +130,8 @@ if __name__ == "__main__":
                         help='The recall value for the train set')
     parser.add_argument('-s', '--seed', type=int, nargs='?', default=random.randint(0, 4294967295),
                         help='The random state used to initialize the algorithms and split dataset')
+    parser.add_argument('-d', '--default', action='store_true', default=False,
+                        help='use the default configuration for kNN-Join')
     args = parser.parse_args()
 
     if args.output is None:
@@ -159,7 +161,14 @@ if __name__ == "__main__":
     folders =[entry for entry in str(args.input).split('/') if entry != '']
     dataset_folder = folders[-1]
     dataset = dataset_folder.split('_')[0]
-    settings = dataset_settings[args.recall][dataset]
+
+    if args.default:
+        settings = {'clean':True, 'reverse':False, 'QGram': 5, 'multiset': True, 'similarity':'cosine', 'K':5}
+        if tableA_df.shape[0]<tableB_df.shape[0]:
+            settings['reverse'] = True
+    else:
+        settings = dataset_settings[args.recall][dataset]
+
 
     start_time = time.process_time()
     train, valid, test, stats = split_input(tableA_df, tableB_df, matches_df,

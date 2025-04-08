@@ -16,3 +16,6 @@
 [submodule "methods/ditto/fork-ditto"]
 	path = methods/ditto/fork-ditto
 	url = git@github.com:erbench/fork-ditto.git
+[submodule "methods/emtransformer/fork-emtransformer"]
+	path = methods/emtransformer/fork-emtransformer
+	url = git@github.com:erbench/fork-EMTransformer.git

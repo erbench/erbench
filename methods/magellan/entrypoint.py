@@ -129,8 +129,14 @@ matcher.fit(table=train_f_vectors, exclude_attrs=excl_attributes, target_attr='l
 train_time = time.process_time() - start_time
 
 start_time = time.process_time()
-prediction = matcher.predict(table=test_f_vectors, exclude_attrs=excl_attributes, append=True, return_probs=True,
-                             inplace=False, target_attr='prediction', probs_attr='probability')
+if args.method == "SVM":
+    prediction = matcher.predict(table=test_f_vectors, exclude_attrs=excl_attributes, append=True, return_probs=False,
+                                inplace=False, target_attr='prediction')
+    prediction['probability'] = prediction['prediction'].astype(float)
+else:
+    prediction = matcher.predict(table=test_f_vectors, exclude_attrs=excl_attributes, append=True, return_probs=True,
+                                 inplace=False, target_attr='prediction', probs_attr='probability')
+
 eval_time = time.process_time() - start_time
 # Step 3. Convert the output into a common format
 transform_output(prediction, train_time, eval_time, args.output)

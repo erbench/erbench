@@ -25,7 +25,7 @@ parser.add_argument('-s', '--seed', type=int, nargs='?', default=random.randint(
 parser.add_argument('-e', '--epochs', type=int, nargs='?', default=5,  # 15.0
                     help='Number of epochs to train the model')
 parser.add_argument('-lm', '--languagemodel', type=str, nargs='?', default='RoBERTa',
-                    help='The language model to use', choices=['BERT', 'RoBERTa', 'DistilBERT', 'XLNet', 'XLM', 'ALBERT'])
+                    help='The language model to use', choices=['BERT', 'RoBERTa', 'DistilBERT', 'XLNet'])
 args = parser.parse_args()
 
 if args.output is None:

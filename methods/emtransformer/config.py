@@ -3,7 +3,7 @@ import json
 import logging
 import os
 
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, \
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoConfig,\
     AlbertConfig, AlbertForSequenceClassification, AlbertTokenizer
 from transformers import BertConfig, BertForSequenceClassification, BertTokenizer, XLMForSequenceClassification, \
     XLMConfig, XLMTokenizer, \
@@ -21,10 +21,10 @@ class Config():
 
     MODEL_CLASSES = {
         'bert': (BertConfig, BertForSequenceClassification, BertTokenizer),
-        'albert': (AlbertConfig, AlbertForSequenceClassification, AlbertTokenizer),
+        'albert': (AutoConfig, AutoModelForSequenceClassification, AutoTokenizer),
         # 'xlnet': (XLNetConfig, XLNetForSequenceClassification, XLNetTokenizer),
         'xlnet': (None, AutoModelForSequenceClassification, AutoTokenizer),
-        'xlm': (XLMConfig, XLMForSequenceClassification, XLMTokenizer),
+        'xlm': (XLMConfig, XLMForSequenceClassification, AutoTokenizer),
         'roberta': (RobertaConfig, RobertaForSequenceClassification, RobertaTokenizer),
         'distilbert': (DistilBertConfig, DistilBertForSequenceClassification, DistilBertTokenizer),
         'sdistilroberta': (None, AutoModelForSequenceClassification, AutoTokenizer),

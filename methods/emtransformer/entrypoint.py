@@ -1,3 +1,7 @@
+import sys
+sys.path.append('fork-emtransformer/src')
+
+
 import argparse
 import pathtype
 import os
@@ -12,6 +16,7 @@ from optimizer import build_optimizer
 from prediction import predict
 from torch_initializer import initialize_gpu_seed
 from training import train
+from evaluation import Evaluation
 from transform import transform_input, transform_output
 import torch
 
@@ -107,6 +112,7 @@ valid_data_loader = load_data(valid_examples,
                              max_seq_length,
                              train_batch_size,
                              DataType.EVALUATION, model_name)
+validation = Evaluation(valid_data_loader, model_name, args.output, len(label_list), model_name)
 
 test_examples = [InputExample(i, row[prefix_1 + 'AgValue'], row[prefix_2 + 'AgValue'], row['label']) for i, row
                  in test_df.iterrows()]
@@ -117,6 +123,7 @@ test_data_loader = load_data(test_examples,
                              max_seq_length,
                              train_batch_size,
                              DataType.TEST, model_name)
+#testing = Evaluation(test_data_loader, model_name, args.output, len(label_list), model_name)
 
 num_train_steps = len(training_data_loader) * args.epochs
 
@@ -130,17 +137,17 @@ optimizer, scheduler = build_optimizer(model,
 start_time = time.process_time()
 results_per_epoch = train(device,
                           training_data_loader,
-                          valid_data_loader,
-                          test_data_loader,
                           model,
                           optimizer,
                           scheduler,
+                          validation,
                           args.epochs,
                           1.0,
                           False,
                           experiment_name=model_name,
                           output_dir=args.output,
-                          model_type=model_name)
+                          model_type=model_name,)
+ #                         testing=testing)
 train_time = time.process_time() - start_time
 
 # Testing
@@ -149,11 +156,8 @@ if model_name == 'bert':
     include_token_type_ids = True
 
 start_time = time.process_time()
-simple_accuracy, f1, classification_report, prfs, predictions, logits = predict(model, device, test_data_loader, include_token_type_ids)
+classification_report, predictions, logits = predict(model, device, test_data_loader, model_name)#, include_token_type_ids)
 eval_time = time.process_time() - start_time
-
-keys = ['precision', 'recall', 'fbeta_score', 'support']
-prfs = {f'class_{no}': {key: float(prfs[nok][no]) for nok, key in enumerate(keys)} for no in range(2)}
 
 
 # Step 3. Convert the output into a common format

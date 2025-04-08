@@ -11,23 +11,16 @@ From: pytorch/pytorch:1.10.0-cuda11.3-cudnn8-runtime
 
 %files
     requirements.txt /srv
+    fork-emtransformer /srv
     entrypoint.py /srv
-    config.py /srv
-    data_loader.py /srv
-    feature_extraction.py /srv
-    logging_customized.py /srv
-    optimizer.py /srv
-    torch_initializer.py /srv
     transform.py /srv
-    data_representation.py /srv
-    model.py /srv
-    prediction.py /srv
-    training.py /srv
-    __init__.py /srv
 
 %post
     cd /srv
     pip install --no-cache-dir -r requirements.txt
+
+%environment
+    export PYTHONPATH="${PYTHONPATH}:/srv/fork-emtransformer/src"
 
 %runscript
     exec python -u /srv/entrypoint.py  "$@"

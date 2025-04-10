@@ -164,7 +164,7 @@ export default function ViewJob({job}) {
           <div className="flex flex-column gap-2">
             {job.result && (
               <div className="flex justify-content-between">
-                <span className="font-medium">Completed At:</span>
+                <span className="font-medium">Completed:</span>
                 <span className="white-space-nowrap">{new Date(job.result.updatedAt).toISOString()}</span>
               </div>
             )}

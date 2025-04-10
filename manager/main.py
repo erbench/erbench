@@ -39,16 +39,17 @@ def render_params(params: dict) -> str:
 
 
 def import_filtering_job(job_id: str, input_dir: any, slurm_job_id: int = None):
-    print(f"Importing filtering for job {job_id} from {input_dir}")
+    print(f"Importing filtering results from {input_dir}")
     results = import_filtering_results(input_dir)
-    if not results: exit(1)
+    if not results:
+        raise RuntimeError(f"Error importing filtering results for job {job_id}")
 
     erbench_client.send_results(job_id, JobStatus.MATCHING, results)
-    print("Filtering results upload completed successfully")
+    print("Filtering results uploaded successfully")
 
 
 def import_job(job_id: str, input_dir: any, slurm_job_id: int = None):
-    print(f"Importing results for job {job_id} from {input_dir}")
+    print(f"Importing results from {input_dir}")
 
     slurm_job_str = None
     if slurm_job_id:
@@ -63,7 +64,8 @@ def import_job(job_id: str, input_dir: any, slurm_job_id: int = None):
             print(f"Warning: Error retrieving Slurm metrics: {str(e)}")
 
     results = import_results(input_dir)
-    if not results: exit(1)
+    if not results:
+        raise RuntimeError(f"Error importing results for job {job_id}")
 
     if slurm_job_str:
         results = import_slurm_metrics(slurm_job_str, results)
@@ -73,7 +75,8 @@ def import_job(job_id: str, input_dir: any, slurm_job_id: int = None):
     print("Results upload completed successfully")
 
     predictions = import_predictions(input_dir)
-    if not predictions: exit(1)
+    if not predictions:
+        raise RuntimeError(f"Error importing predictions for job {job_id}")
 
     erbench_client.send_predictions(job_id, predictions)
     print("Predictions upload completed successfully")
@@ -164,10 +167,7 @@ def get_job_status(slurm_job_id) -> str:
     process = subprocess.run(['sacct', '-j', str(slurm_job_id), '--format=State', '--parsable2', '--noheader'], capture_output=True, text=True)
     if process.returncode != 0:
         raise RuntimeError(f"Error checking job status: {process.stderr}")
-
-    status = process.stdout.strip().split('\n')[0]
-    print(f"Job {slurm_job_id} status: {status}")
-    return status
+    return process.stdout.strip().split('\n')[0]
 
 
 def cancel_job(slurm_job_id):
@@ -186,7 +186,7 @@ def check_job(job: Job):
             filtering_status = get_job_status(job['filteringSlurmId'])
             print(f"Filtering status: {filtering_status}")
 
-            if filtering_status == 'RUNNING':
+            if filtering_status == 'RUNNING' or filtering_status == 'COMPLETING':
                 if job['status'] != JobStatus.FILTERING:
                     erbench_client.update_job(job['id'], JobStatus.FILTERING)
                 return
@@ -216,6 +216,7 @@ def check_job(job: Job):
             erbench_client.update_job(job['id'], JobStatus.FAILED)
             print(f"Job {job['id']} failed")
     except Exception as e:
+        erbench_client.update_job(job['id'], JobStatus.FAILED)
         print(f"Error checking job status: {str(e)}")
 
 

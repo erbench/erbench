@@ -7,6 +7,7 @@ import {Column} from "primereact/column";
 import Head from 'next/head';
 import {hideEmail} from "../../utils/formattingUtils";
 import {Button} from "primereact/button";
+import {renderParams} from "../../utils/jobUtils";
 
 export const getServerSideProps = async ({query}) => {
   const {id} = query;
@@ -116,7 +117,7 @@ export default function ViewJob({job}) {
       <div className="grid">
         <div className="col-6">
           <div className="flex flex-column gap-2">
-            <div className="flex justify-content-between">
+            <div className="flex justify-content-between mb-2">
               <span className="font-medium">Dataset:</span>
               <span className="white-space-nowrap">{job.dataset.name}</span>
             </div>
@@ -124,52 +125,47 @@ export default function ViewJob({job}) {
               <span className="font-medium">Filtering Algorithm:</span>
               <span className="white-space-nowrap">{job.filteringAlgo.name}</span>
             </div>
+            <div className="flex justify-content-between mb-2">
+              <span className="font-medium">Filtering Params:</span>
+              <span className="white-space-nowrap">{renderParams(job.filteringParams)}</span>
+            </div>
+          </div>
+        </div>
+        <div className="col-6">
+          <div className="flex flex-column gap-2">
             <div className="flex justify-content-between">
               <span className="font-medium">Matching Algorithm:</span>
               <span className="white-space-nowrap">{job.matchingAlgo.name}</span>
             </div>
             <div className="flex justify-content-between">
-              <span className="font-medium">Created:</span>
-              <span className="white-space-nowrap">{new Date(job.createdAt).toISOString()}</span>
+              <span className="font-medium">Matching Params:</span>
+              <span className="white-space-nowrap">{renderParams(job.matchingParams)}</span>
             </div>
-            {job.result && (
-              <div className="flex justify-content-between">
-                <span className="font-medium">Completed At:</span>
-                <span className="white-space-nowrap">{new Date(job.result.createdAt).toISOString()}</span>
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="col-6">
-          <div className="flex flex-column gap-2">
-            {job.filteringParams.recall && (
-              <div className="flex justify-content-between">
-                <span className="font-medium">Filtering Recall:</span>
-                <span className="white-space-nowrap">{job.filteringParams.recall}</span>
-              </div>
-            )}
-            {job.filteringParams.epochs && (
-              <div className="flex justify-content-between">
-                <span className="font-medium">Filtering Epochs:</span>
-                <span className="white-space-nowrap">{job.filteringParams.epochs}</span>
-              </div>
-            )}
-            {job.matchingParams.recall && (
-              <div className="flex justify-content-between">
-                <span className="font-medium">Matching Recall:</span>
-                <span className="white-space-nowrap">{job.matchingParams.recall}</span>
-              </div>
-            )}
-            {job.matchingParams.epochs && (
-              <div className="flex justify-content-between">
-                <span className="font-medium">Matching Epochs:</span>
-                <span className="white-space-nowrap">{job.matchingParams.epochs}</span>
-              </div>
-            )}
             {job.notifyEmail && (
               <div className="flex justify-content-between">
                 <span className="font-medium">Notification Email:</span>
                 <span className="white-space-nowrap">{job.notifyEmail}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid">
+        <div className="col-6">
+          <div className="flex flex-column gap-2">
+            <div className="flex justify-content-between">
+              <span className="font-medium">Created:</span>
+              <span className="white-space-nowrap">{new Date(job.createdAt).toISOString()}</span>
+            </div>
+          </div>
+        </div>
+        <div className="col-6">
+          <div className="flex flex-column gap-2">
+            {job.result && (
+              <div className="flex justify-content-between">
+                <span className="font-medium">Completed At:</span>
+                <span className="white-space-nowrap">{new Date(job.result.updatedAt).toISOString()}</span>
               </div>
             )}
           </div>

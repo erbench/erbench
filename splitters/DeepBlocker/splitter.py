@@ -3,19 +3,22 @@ sys.path.append('fork-deepblocker')
 
 import argparse
 import os
+import time
 import random
 import pathtype
 import pandas as pd
+
 from deep_blocker import DeepBlocker
 from tuple_embedding_models import AutoEncoderTupleEmbedding
 from vector_pairing_models import ExactTopKVectorPairing
 from sklearn.model_selection import train_test_split
+
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import SnowballStemmer
 from settings import dataset_settings
-import time
+
 
 def clean_entry(entry, stemmer, stop_words):
     try:
@@ -155,8 +158,6 @@ if __name__ == "__main__":
     stop_time = time.process_time()
     print("Done! Train size: {}, test size: {}.".format(train.shape[0], test.shape[0]))
 
-
-
     train.to_csv(os.path.join(args.output, "train.csv"), index=False)
     valid.to_csv(os.path.join(args.output, "valid.csv"), index=False)
     test.to_csv(os.path.join(args.output, "test.csv"), index=False)
@@ -165,9 +166,13 @@ if __name__ == "__main__":
     tableB_df.to_csv(os.path.join(args.output, "tableB.csv"), index=False)
     matches_df.to_csv(os.path.join(args.output, "matches.csv"), index=False)
 
-    metrics_file = open(os.path.join(args.output, "filtering_metrics.txt"), 'w')
-    cols = ['f1', 'precision', 'recall', 'filtering_time', 'num_candidates', 'entries_tableA', 'entries_tableB', 'entries_matches']
-    stats = stats[:3] + [stop_time - start_time] + [stats[3]] + [tableA_df.shape[0], tableB_df.shape[0], matches_df.shape[0]]
-    print(*cols, file=metrics_file, sep=',')
-    print(*stats, file=metrics_file, sep=',')
-    metrics_file.close()
+    pd.DataFrame({
+        'f1': [stats[0]],
+        'precision': [stats[1]],
+        'recall': [stats[2]],
+        'filtering_time': [stop_time - start_time],
+        'num_candidates': [stats[3]],
+        'entries_tableA': [tableA_df.shape[0]],
+        'entries_tableB': [tableB_df.shape[0]],
+        'entries_matches': [matches_df.shape[0]],
+    }).to_csv(os.path.join(args.output, 'filtering_metrics.csv'), index=False)

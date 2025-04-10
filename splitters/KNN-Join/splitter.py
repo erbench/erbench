@@ -2,10 +2,11 @@ import sys
 sys.path.append('fork-deepblocker')
 
 import argparse
-from os import path
 import os
+import time
 import random
 import pathtype
+
 import pandas as pd
 from pyjedai.joins import TopKJoin
 from pyjedai.datamodel import Data
@@ -14,7 +15,7 @@ from sklearn.model_selection import train_test_split
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import SnowballStemmer
-import time
+
 
 def clean_entry(entry, stemmer, stop_words):
     list_entries = word_tokenize(entry)
@@ -143,9 +144,9 @@ if __name__ == "__main__":
         exit(1)
 
     print("Hi, I'm KNN-Join splitter, I'm splitting the candidates of KNN-Join into train and test sets.")
-    tableA_df = pd.read_csv(path.join(args.input, 'tableA.csv'), encoding_errors='replace')
-    tableB_df = pd.read_csv(path.join(args.input, 'tableB.csv'), encoding_errors='replace')
-    matches_df = pd.read_csv(path.join(args.input, 'matches.csv'), encoding_errors='replace')
+    tableA_df = pd.read_csv(os.path.join(args.input, 'tableA.csv'), encoding_errors='replace')
+    tableB_df = pd.read_csv(os.path.join(args.input, 'tableB.csv'), encoding_errors='replace')
+    matches_df = pd.read_csv(os.path.join(args.input, 'matches.csv'), encoding_errors='replace')
 
     tableA_df = tableA_df.set_index('id', drop=False)
     tableB_df = tableB_df.set_index('id', drop=False)
@@ -184,10 +185,13 @@ if __name__ == "__main__":
     tableB_df.to_csv(os.path.join(args.output, "tableB.csv"), index=False)
     matches_df.to_csv(os.path.join(args.output, "matches.csv"), index=False)
 
-    metrics_file = open(os.path.join(args.output, "filtering_metrics.txt"), 'w')
-    cols = ['f1', 'precision', 'recall', 'filtering_time', 'num_candidates', 'entries_tableA', 'entries_tableB', 'entries_matches']
-    stats = stats[:3] + [stop_time - start_time] + [stats[3]] + [tableA_df.shape[0], tableB_df.shape[0], matches_df.shape[0]]
-    print(*cols, file=metrics_file, sep=',')
-    print(*stats, file=metrics_file, sep=',')
-    metrics_file.close()
-
+    pd.DataFrame({
+        'f1': [stats[0]],
+        'precision': [stats[1]],
+        'recall': [stats[2]],
+        'filtering_time': [stop_time - start_time],
+        'num_candidates': [stats[3]],
+        'entries_tableA': [tableA_df.shape[0]],
+        'entries_tableB': [tableB_df.shape[0]],
+        'entries_matches': [matches_df.shape[0]],
+    }).to_csv(os.path.join(args.output, 'filtering_metrics.csv'), index=False)

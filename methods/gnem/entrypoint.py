@@ -30,7 +30,7 @@ parser.add_argument('-e', '--epochs', type=int, nargs='?', default=1,
                     help='Number of epochs to train the model')
 parser.add_argument('-s', '--seed', type=int, nargs='?', default=random.randint(0, 4294967295),
                     help='The random state used to initialize the algorithms and split dataset')
-parser.add_argument('-lm', '--languagemodel', type=str, nargs='?', default='BERT',
+parser.add_argument('-m', '--model', type=str, nargs='?', default='BERT',
                     help='The language model to use', choices=['BERT', 'RoBERTa', 'DistilBERT', 'XLNet', 'Albert'])
 args = parser.parse_args()
 
@@ -90,7 +90,7 @@ train_iter = DataLoader(train_dataset, batch_size=batch_size, collate_fn=collate
 val_iter = DataLoader(val_dataset, batch_size=batch_size, collate_fn=collate_fn, shuffle=False)
 test_iter = DataLoader(test_dataset, batch_size=batch_size, collate_fn=collate_fn, shuffle=False)
 
-embedmodel = EmbedModel(useful_field_num=useful_field_num, lm = args.languagemodel.lower(), device=device)
+embedmodel = EmbedModel(useful_field_num=useful_field_num, lm = args.model.lower(), device=device)
 
 gcn_layer = 1
 dropout = 0.0

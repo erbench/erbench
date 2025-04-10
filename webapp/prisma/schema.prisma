@@ -82,7 +82,18 @@ model Result {
   job   Job    @relation(fields: [jobId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   jobId String @id
 
-  // scores
+  // filtering
+  filteringF1        Float?
+  filteringPrecision Float?
+  filteringRecall    Float?
+  filteringTime     BigInt?
+
+  filteringCandidates Int?
+  filteringEntriesA  Int?
+  filteringEntriesB  Int?
+  filteringMatches   Int?
+
+  // matching
   f1        Float?
   precision Float?
   recall    Float?

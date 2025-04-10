@@ -178,7 +178,64 @@ export default function ViewJob({job}) {
     </Panel>
 
     {job.result && (
-      <Panel header="Results" className="mt-3">
+      <Panel header="Filtering Results" className="mt-3">
+        <div className="grid">
+          <div className="col-6">
+            <div className="flex flex-column gap-2">
+              <div className="flex justify-content-between">
+                <span className="font-medium">F1 Score:</span>
+                <span>{job.result.filteringF1 !== null ? job.result.filteringF1.toFixed(6) : 'N/A'}</span>
+              </div>
+              <div className="flex justify-content-between">
+                <span className="font-medium">Precision:</span>
+                <span>{job.result.filteringPrecision !== null ? job.result.filteringPrecision.toFixed(6) : 'N/A'}</span>
+              </div>
+              <div className="flex justify-content-between">
+                <span className="font-medium">Recall:</span>
+                <span>{job.result.filteringRecall !== null ? job.result.filteringRecall.toFixed(6) : 'N/A'}</span>
+              </div>
+              {job.result.filteringTime !== null && (
+                <div className="flex justify-content-between">
+                  <span className="font-medium">Filtering time:</span>
+                  <span>{(Number(job.result.filteringTime) / 1000).toFixed(3)}s</span>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="col-6">
+            <div className="flex flex-column gap-2">
+              {job.result.filteringCandidates !== null && (
+                <div className="flex justify-content-between">
+                  <span className="font-medium">Candidate Pairs:</span>
+                  <span>{Number(job.result.filteringCandidates)}</span>
+                </div>
+              )}
+              {job.result.filteringEntriesA !== null && (
+                <div className="flex justify-content-between">
+                  <span className="font-medium">Entities in Table A:</span>
+                  <span>{Number(job.result.filteringEntriesA)}</span>
+                </div>
+              )}
+              {job.result.filteringEntriesB !== null && (
+                <div className="flex justify-content-between">
+                  <span className="font-medium">Entities in Table A:</span>
+                  <span>{Number(job.result.filteringEntriesB)}</span>
+                </div>
+              )}
+              {job.result.filteringMatches !== null && (
+                <div className="flex justify-content-between">
+                  <span className="font-medium">Entities in Matches:</span>
+                  <span>{Number(job.result.filteringMatches)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </Panel>
+    )}
+
+    {job.result && job.status === 'completed' && (
+      <Panel header="Matching Results" className="mt-3">
         <div className="grid">
           <div className="col-6">
             <div className="flex flex-column gap-2">

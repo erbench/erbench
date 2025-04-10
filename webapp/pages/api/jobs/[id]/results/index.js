@@ -30,6 +30,15 @@ export default async function handler(req, res) {
             jobId: jobId,
           },
           update: {
+            filteringF1: req.body.filteringF1,
+            filteringPrecision: req.body.filteringPrecision,
+            filteringRecall: req.body.filteringRecall,
+            filteringTime: req.body.filteringTime,
+            filteringCandidates: req.body.filteringCandidates,
+            filteringEntriesA: req.body.filteringEntriesA,
+            filteringEntriesB: req.body.filteringEntriesB,
+            filteringMatches: req.body.filteringMatches,
+
             f1: req.body.f1,
             precision: req.body.precision,
             recall: req.body.recall,
@@ -47,6 +56,15 @@ export default async function handler(req, res) {
           },
           create: {
             jobId: jobId,
+
+            filteringF1: req.body.filteringF1,
+            filteringPrecision: req.body.filteringPrecision,
+            filteringRecall: req.body.filteringRecall,
+            filteringTime: req.body.filteringTime,
+            filteringCandidates: req.body.filteringCandidates,
+            filteringEntriesA: req.body.filteringEntriesA,
+            filteringEntriesB: req.body.filteringEntriesB,
+            filteringMatches: req.body.filteringMatches,
 
             f1: req.body.f1,
             precision: req.body.precision,

@@ -47,7 +47,8 @@ function generatePredictionsCsv(job) {
   csv += `# Matching Parameters: ${JSON.stringify(job.matchingAlgo.parameters)}\n`;
   csv += `# Created: ${new Date(job.createdAt).toISOString()}\n`;
   if (job.result) {
-    csv += `# Scores: f1 ${job.result.f1}, precision ${job.result.precision}, recall ${job.result.recall}, trainTime ${job.result.trainTime}, evalTime ${job.result.evalTime}\n`;
+    csv += `# Filtering: f1 ${job.result.filteringF1}, precision ${job.result.filteringPrecision}, recall ${job.result.filteringRecall}, filteringTime ${job.result.filteringTime}, candidates ${job.result.filteringCandidates}, entriesA ${job.result.filteringEntriesA}, entriesB ${job.result.filteringEntriesB}, matches ${job.result.filteringMatches}\n`;
+    csv += `# Matching: f1 ${job.result.f1}, precision ${job.result.precision}, recall ${job.result.recall}, trainTime ${job.result.trainTime}, evalTime ${job.result.evalTime}\n`;
   }
   csv += `# Total Predictions: ${job.predictions.length}\n\n`;
 

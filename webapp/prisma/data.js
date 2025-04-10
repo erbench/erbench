@@ -1,16 +1,16 @@
 export const algorithms = [
   // splitters
-  {code: 'splitter_random', name: 'Random Split', scenarios: ['filtering'], params: ['recall']},
-  {code: 'splitter_deepblocker', name: 'DeepBlocker', scenarios: ['filtering'], params: ['recall']},
-  {code: 'splitter_knnjoin', name: 'top kNN-Join', scenarios: ['filtering'], params: ['recall']},
+  {code: 'splitter_random', name: 'Random Split', scenarios: ['filtering'], params: {recall: 'number', neg_pairs_ratio: 'number'}},
+  {code: 'splitter_deepblocker', name: 'DeepBlocker', scenarios: ['filtering'], params: {recall: 'number'}},
+  {code: 'splitter_knnjoin', name: 'top kNN-Join', scenarios: ['filtering'], params: {recall: 'dropdown=0.85|0.90|0.95', 'default': 'boolean'}},
   // matchers
-  {code: 'deepmatcher', name: 'DeepMatcher', scenarios: ['matching'], params: ['epochs']},
-  {code: 'ditto', name: 'DITTO', scenarios: ['matching'], params: ['epochs']},
-  {code: 'emtransformer', name: 'EMTransformer', scenarios: ['matching'], params: ['recall', 'epochs']},
-  {code: 'gnem', name: 'GNEM', scenarios: ['matching'], params: ['epochs']},
-  {code: 'hiermatcher', name: 'HierMatcher', scenarios: ['matching'], params: ['epochs']},
-  {code: 'magellan', name: 'Magellan', scenarios: ['matching'], params: []},
-  {code: 'zeroer', name: 'ZeroER', scenarios: ['matching'], params: []},
+  {code: 'deepmatcher', name: 'DeepMatcher', scenarios: ['matching'], params: {epochs: 'number'}},
+  {code: 'ditto', name: 'DITTO', scenarios: ['matching'], params: {epochs: 'number', model: 'dropdown=RoBERTa|DistilBERT'}},
+  {code: 'emtransformer', name: 'EMTransformer', scenarios: ['matching'], params: {epochs: 'number', model: 'dropdown=BERT|RoBERTa|DistilBERT|XLNet'}},
+  {code: 'gnem', name: 'GNEM', scenarios: ['matching'], params: {epochs: 'number', model: 'dropdown=BERT|RoBERTa|DistilBERT|XLNet|ALBERT'}},
+  {code: 'hiermatcher', name: 'HierMatcher', scenarios: ['matching'], params: {epochs: 'number'}},
+  {code: 'magellan', name: 'Magellan', scenarios: ['matching'], params: {method: 'dropdown=DecisionTree|SVM|RF|LogReg|LinReg|NaiveBayes'}},
+  {code: 'zeroer', name: 'ZeroER', scenarios: ['matching'], params: {full: 'boolean'}},
 ];
 
 export const datasets = [

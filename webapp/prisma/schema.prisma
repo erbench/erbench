@@ -31,17 +31,12 @@ enum Scenario {
   matching
 }
 
-enum Param {
-  recall
-  epochs
-}
-
 model Algorithm {
   id        Int        @id @default(autoincrement())
   code      String     @unique
   name      String
   scenarios Scenario[]
-  params    Param[]
+  params    Json?
   createdAt DateTime   @default(now())
 
   filteringJobs Job[] @relation("filteringAlgo")
@@ -110,6 +105,7 @@ model Result {
   energyConsumed BigInt?
   totalRuntime   BigInt?
 
+  updatedAt DateTime @default(now()) @updatedAt
   createdAt DateTime @default(now())
 }
 

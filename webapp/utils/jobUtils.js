@@ -52,9 +52,9 @@ export const renderNameAndParams = (name, params) => {
 
 export const renderParams = (params) => {
   return (
-    <div className="flex flex-column text-sm">
+    <div className="flex flex-column">
       {Object.entries(params).map(([key, value]) => {
-        return <div key={key} className="flex gap-2">
+        return <div key={key} className="flex justify-content-between gap-2">
           <span>{key}</span>
           <span className="font-medium">{value}</span>
         </div>

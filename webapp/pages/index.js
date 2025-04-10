@@ -26,16 +26,21 @@ export const getServerSideProps = async ({req}) => {
 
 export default function Home({datasets, algorithms}) {
   const router = useRouter();
-  const filteringRecallOptions = [0.85, 0.90, 0.95];
 
   // fields
   const [selectedDataset, setSelectedDataset] = useState(datasets[0]);
+
   const [selectedFilteringAlgo, setSelectedFilteringAlgo] = useState(algorithms.find(algo => algo.scenarios.includes('filtering')));
-  const [filteringRecall, setFilteringRecall] = useState(filteringRecallOptions[0]);
-  const [filteringEpochs, setFilteringEpochs] = useState(5);
+  const [filteringRecall, setFilteringRecall] = useState(0.90);
+  const [filteringNegPairsRatio, setFilteringNegPairsRatio] = useState(10);
+  const [filteringDefault, setFilteringDefault] = useState(false);
+
   const [selectedMatchingAlgo, setSelectedMatchingAlgo] = useState(algorithms.find(algo => algo.scenarios.includes('matching')));
-  const [matchingRecall, setMatchingRecall] = useState(0.85);
   const [matchingEpochs, setMatchingEpochs] = useState(10);
+  const [matchingModel, setMatchingModel] = useState(null);
+  const [matchingMethod, setMatchingMethod] = useState(null);
+  const [matchingFull, setMatchingFull] = useState(false);
+
   const [email, setEmail] = useState('');
 
   // state
@@ -51,19 +56,28 @@ export default function Home({datasets, algorithms}) {
     setDisabled(true);
 
     let filteringParams = {};
-    if (selectedFilteringAlgo.params.includes('recall')) {
+    if ('recall' in selectedFilteringAlgo.params) {
       filteringParams.recall = filteringRecall;
     }
-    if (selectedFilteringAlgo.params.includes('epochs')) {
-      filteringParams.epochs = filteringEpochs;
+    if ('neg_pairs_ratio' in selectedFilteringAlgo.params) {
+      filteringParams.neg_pairs_ratio = filteringNegPairsRatio;
+    }
+    if ('default' in selectedFilteringAlgo.params) {
+      filteringParams.default = filteringDefault;
     }
 
     let matchingParams = {};
-    if (selectedMatchingAlgo.params.includes('recall')) {
-      matchingParams.recall = matchingRecall;
-    }
-    if (selectedMatchingAlgo.params.includes('epochs')) {
+    if ('epochs' in selectedMatchingAlgo.params) {
       matchingParams.epochs = matchingEpochs;
+    }
+    if ('model' in selectedMatchingAlgo.params) {
+      matchingParams.model = matchingModel;
+    }
+    if ('method' in selectedMatchingAlgo.params) {
+      matchingParams.method = matchingMethod;
+    }
+    if ('full' in selectedMatchingAlgo.params) {
+      matchingParams.full = matchingFull;
     }
 
     if (!forceSubmit) {
@@ -148,28 +162,48 @@ export default function Home({datasets, algorithms}) {
           <small id="filtering-algorithm-help">Which algorithm to use for filtering the dataset</small>
         </div>
 
-        <div className={(selectedFilteringAlgo != null && selectedFilteringAlgo.params.includes('recall') ? null : "hidden")}>
+        {selectedFilteringAlgo != null && 'recall' in selectedFilteringAlgo.params && (
           <div className="flex flex-column gap-2 mb-3">
             <label htmlFor="filtering-recall">Filtering Recall</label>
-            <Dropdown id="filtering-recall" aria-describedby="filtering-recall-help" className="w-full"
-                      value={filteringRecall} onChange={(e) => setFilteringRecall(e.value)}
-                      disabled={formDisabled}
-                      options={filteringRecallOptions}
-                      placeholder="Select an algorithm"/>
+            {selectedFilteringAlgo.params.recall === 'number' && (
+              <InputNumber id="filtering-recall" aria-describedby="filtering-recall-help" className="w-full"
+                           value={filteringRecall} onValueChange={(e) => setFilteringRecall(e.value)}
+                           disabled={formDisabled}
+                           minFractionDigits={2} min={0} max={1} step={0.05} mode="decimal"
+                           showButtons/>
+            )}
+            {selectedFilteringAlgo.params.recall.startsWith('dropdown') && (
+              <Dropdown id="filtering-recall" aria-describedby="filtering-recall-help" className="w-full"
+                        value={filteringRecall} onChange={(e) => setFilteringRecall(e.value)}
+                        disabled={formDisabled}
+                        options={selectedFilteringAlgo.params.recall.split('=')[1].split('|').map(v => parseFloat(v))}
+                        placeholder="Select an algorithm"/>
+            )}
             <small id="filtering-recall-help">A recall value for filtering</small>
           </div>
-        </div>
+        )}
 
-        <div className={(selectedFilteringAlgo != null && selectedFilteringAlgo.params.includes('epochs') ? null : "hidden")}>
+        {selectedFilteringAlgo != null && 'neg_pairs_ratio' in selectedFilteringAlgo.params && selectedFilteringAlgo.params.neg_pairs_ratio === 'number' && (
           <div className="flex flex-column gap-2 mb-3">
-            <label htmlFor="filtering-epochs">Filtering Epochs</label>
-            <InputNumber id="filtering-epochs" aria-describedby="filtering-epochs-help" className="w-full"
-                         value={filteringEpochs} onValueChange={(e) => setFilteringEpochs(e.value)}
+            <label htmlFor="filtering-negpairs">Negative Pairs Ratio</label>
+            <InputNumber id="filtering-negpairs" aria-describedby="filtering-negpairs-help" className="w-full"
+                         value={filteringNegPairsRatio} onValueChange={(e) => setFilteringNegPairsRatio(e.value)}
                          disabled={formDisabled}
-                         minFractionDigits={0} min={5} max={50} step={5} showButtons/>
-            <small id="filtering-epochs-help">A numbers of epochs to run for filtering</small>
+                         minFractionDigits={1} min={0} max={50} step={0.1} mode="decimal"
+                         showButtons/>
+            <small id="filtering-negpairs-help">A ratio of negative pairs to positive pairs</small>
           </div>
-        </div>
+        )}
+
+        {selectedFilteringAlgo != null && 'default' in selectedFilteringAlgo.params && selectedFilteringAlgo.params.default === 'boolean' && (
+          <div className="flex flex-column gap-2 mb-3">
+            <label htmlFor="filtering-default">Default settings</label>
+            <Checkbox id="filtering-default" aria-describedby="filtering-default-help" className="w-full"
+                      checked={filteringDefault} onChange={e => setFilteringDefault(e.checked)}
+                      disabled={formDisabled}/>
+            <small id="filtering-default-help">Whether to use default settings or file-tuned for per dataset</small>
+          </div>
+        )}
 
         {/*<div className="flex flex-column gap-2 mb-3">
           <label htmlFor="dataset_file">Own dataset</label>
@@ -204,19 +238,7 @@ export default function Home({datasets, algorithms}) {
           <small id="matching-algorithm-help">Which algorithm / model to use</small>
         </div>
 
-        <div className={(selectedMatchingAlgo != null && selectedMatchingAlgo.params.includes('recall') ? null : "hidden")}>
-          <div className="flex flex-column gap-2 mb-3">
-            <label htmlFor="matching-recall">Matching Recall</label>
-            <InputNumber id="matching-recall" aria-describedby="matching-recall-help" className="w-full"
-                         value={matchingRecall} onValueChange={(e) => setMatchingRecall(e.value)}
-                         disabled={formDisabled}
-                         minFractionDigits={2} min={0} max={1} step={0.05} mode="decimal"
-                         showButtons/>
-            <small id="matching-recall-help">A recall value between 0 and 1</small>
-          </div>
-        </div>
-
-        <div className={(selectedMatchingAlgo != null && selectedMatchingAlgo.params.includes('epochs') ? null : "hidden")}>
+        {selectedMatchingAlgo != null && 'epochs' in selectedMatchingAlgo.params && (
           <div className="flex flex-column gap-2 mb-3">
             <label htmlFor="matching-epochs">Matching Epochs</label>
             <InputNumber id="matching-epochs" aria-describedby="matching-epochs-help" className="w-full"
@@ -225,7 +247,45 @@ export default function Home({datasets, algorithms}) {
                          minFractionDigits={0} min={5} max={50} step={5} showButtons/>
             <small id="matching-epochs-help">A numbers of epochs to run</small>
           </div>
-        </div>
+        )}
+
+        {selectedMatchingAlgo != null && 'model' in selectedMatchingAlgo.params && (
+          <div className="flex flex-column gap-2 mb-3">
+            <label htmlFor="matching-model">Matching Language Model</label>
+            {selectedMatchingAlgo.params.model.startsWith('dropdown') && (
+              <Dropdown id="matching-model" aria-describedby="matching-model-help" className="w-full"
+                        value={matchingModel} onChange={(e) => setMatchingModel(e.value)}
+                        disabled={formDisabled}
+                        options={selectedMatchingAlgo.params.model.split('=')[1].split('|')}
+                        placeholder="Select an algorithm"/>
+            )}
+            <small id="matching-model-help">A model value for matching</small>
+          </div>
+        )}
+
+        {selectedMatchingAlgo != null && 'method' in selectedMatchingAlgo.params && (
+          <div className="flex flex-column gap-2 mb-3">
+            <label htmlFor="matching-method">Matching Method</label>
+            {selectedMatchingAlgo.params.method.startsWith('dropdown') && (
+              <Dropdown id="matching-method" aria-describedby="matching-method-help" className="w-full"
+                        value={matchingMethod} onChange={(e) => setMatchingMethod(e.value)}
+                        disabled={formDisabled}
+                        options={selectedMatchingAlgo.params.method.split('=')[1].split('|')}
+                        placeholder="Select an algorithm"/>
+            )}
+            <small id="matching-method-help">A method value for matching</small>
+          </div>
+        )}
+
+        {selectedMatchingAlgo != null && 'full' in selectedMatchingAlgo.params && selectedMatchingAlgo.params.full === 'boolean' && (
+          <div className="flex flex-column gap-2 mb-3">
+            <label htmlFor="matching-full">Use full dataset</label>
+            <Checkbox id="matching-full" aria-describedby="matching-full-help" className="w-full"
+                      checked={matchingFull} onChange={e => setMatchingFull(e.checked)}
+                      disabled={formDisabled}/>
+            <small id="matching-full-help">Whether to use full dataset or just the test part</small>
+          </div>
+        )}
       </div>
     </div>
 
@@ -247,7 +307,7 @@ export default function Home({datasets, algorithms}) {
       </div>
       {results.length > 0 && (
         <div className="col">
-          <Checkbox inputId="force" onChange={e => setForceSubmit(e.checked)} checked={forceSubmit}></Checkbox>
+          <Checkbox inputId="force" onChange={e => setForceSubmit(e.checked)} checked={forceSubmit}/>
           <label htmlFor="force" className="p-checkbox-label pl-2">I want to submit a new job</label>
         </div>
       )}

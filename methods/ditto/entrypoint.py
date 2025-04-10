@@ -31,10 +31,10 @@ parser.add_argument('output', type=str, nargs='?',
                     help='Output directory to store the output')
 parser.add_argument('-s', '--seed', type=int, nargs='?', default=random.randint(0, 4294967295),
                     help='The random state used to initialize the algorithms and split dataset')
-parser.add_argument('-e', '--epochs', type=int, nargs='?', default=10,
+parser.add_argument('-e', '--epochs', type=int, nargs='?', default=5,
                     help='Number of epochs to train the model')
 parser.add_argument('-m', '--model', type=str, nargs='?', default='RoBERTa',
-                    help='The language model to use', choices=['RoBERTa', 'DistilBERT'])
+                    help='The language model to use', choices=['RoBERTa', 'DistilBERT', 'BERT', 'XLNet'])
 args = parser.parse_args()
 
 if args.output is None:

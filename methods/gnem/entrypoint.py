@@ -31,7 +31,7 @@ parser.add_argument('-e', '--epochs', type=int, nargs='?', default=1,
 parser.add_argument('-s', '--seed', type=int, nargs='?', default=random.randint(0, 4294967295),
                     help='The random state used to initialize the algorithms and split dataset')
 parser.add_argument('-m', '--model', type=str, nargs='?', default='BERT',
-                    help='The language model to use', choices=['BERT', 'RoBERTa', 'DistilBERT', 'XLNet', 'Albert'])
+                    help='The language model to use', choices=['BERT', 'DistilBERT', 'XLNet', 'ALBERT'])
 args = parser.parse_args()
 
 if args.output is None:

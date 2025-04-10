@@ -5,9 +5,9 @@ export const algorithms = [
   {code: 'splitter_knnjoin', name: 'top kNN-Join', scenarios: ['filtering'], params: {recall: 'dropdown=0.85|0.90|0.95', 'default': 'boolean'}},
   // matchers
   {code: 'deepmatcher', name: 'DeepMatcher', scenarios: ['matching'], params: {epochs: 'number'}},
-  {code: 'ditto', name: 'DITTO', scenarios: ['matching'], params: {epochs: 'number', model: 'dropdown=RoBERTa|DistilBERT'}},
+  {code: 'ditto', name: 'DITTO', scenarios: ['matching'], params: {epochs: 'number', model: 'dropdown=BERT|RoBERTa|DistilBERT|XLNet'}},
   {code: 'emtransformer', name: 'EMTransformer', scenarios: ['matching'], params: {epochs: 'number', model: 'dropdown=BERT|RoBERTa|DistilBERT|XLNet'}},
-  {code: 'gnem', name: 'GNEM', scenarios: ['matching'], params: {epochs: 'number', model: 'dropdown=BERT|RoBERTa|DistilBERT|XLNet|ALBERT'}},
+  {code: 'gnem', name: 'GNEM', scenarios: ['matching'], params: {epochs: 'number', model: 'dropdown=BERT|DistilBERT|XLNet|ALBERT'}},
   {code: 'hiermatcher', name: 'HierMatcher', scenarios: ['matching'], params: {epochs: 'number'}},
   {code: 'magellan', name: 'Magellan', scenarios: ['matching'], params: {method: 'dropdown=DecisionTree|SVM|RF|LogReg|LinReg|NaiveBayes'}},
   {code: 'zeroer', name: 'ZeroER', scenarios: ['matching'], params: {full: 'boolean'}},

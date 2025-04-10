@@ -49,6 +49,14 @@ class Job(TypedDict):
 
 
 class Metrics(TypedDict, total=False):
+    filteringF1: Optional[float]
+    filteringPrecision: Optional[float]
+    filteringRecall: Optional[float]
+    filteringTime: Optional[int]
+    filteringCandidates: Optional[int]
+    filteringEntriesA: Optional[int]
+    filteringEntriesB: Optional[int]
+    filteringMatches: Optional[int]
     f1: Optional[float]
     precision: Optional[float]
     recall: Optional[float]

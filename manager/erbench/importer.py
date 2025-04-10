@@ -6,6 +6,37 @@ from typing import List
 from .client import Metrics, Prediction
 
 
+def import_filtering_results(directory: str, results: Metrics = None) -> Metrics | None:
+    if results is None:
+        results = Metrics()
+
+    metrics_path = os.path.join(directory, "filtering_metrics.csv")
+    if not os.path.exists(metrics_path):
+        print(f"Error: {metrics_path} does not exist")
+        return None
+
+    try:
+        with open(metrics_path, 'r') as f:
+            reader = csv.reader(f)
+            headers = next(reader)
+            values = next(reader)
+            metrics = dict(zip(headers, values))
+
+            results['filteringF1'] = float(metrics.get("f1", 0))
+            results['filteringPrecision'] = float(metrics.get("precision", 0))
+            results['filteringRecall'] = float(metrics.get("recall", 0))
+            results['filteringTime'] = round(float(metrics.get("filtering_time", 0)) * 1000)
+            results['filteringCandidates'] = int(metrics.get("num_candidates", 0))
+            results['filteringEntriesA'] = int(metrics.get("entries_tableA", 0))
+            results['filteringEntriesB'] = int(metrics.get("entries_tableB", 0))
+            results['filteringMatches'] = int(metrics.get("entries_matches", 0))
+    except Exception as e:
+        print(f"Error reading filtering_metrics.csv: {e}")
+        return None
+
+    return results
+
+
 def import_results(directory: str, results: Metrics = None) -> Metrics | None:
     if results is None:
         results = Metrics()

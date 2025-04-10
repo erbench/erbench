@@ -68,11 +68,11 @@ train_batch_size = 16
 
 config_class, model_class, tokenizer_class = Config.MODEL_CLASSES[model_name]
 if model_name == 'bert':
-    model_path = "textattack/bert-base-uncased-yelp-polarity"
+    model_path = "google-bert/bert-base-uncased"
 elif model_name == 'distilbert':
     model_path = "distilbert-base-uncased"
 elif model_name == 'roberta':
-    model_path = "cardiffnlp/twitter-roberta-base-emotion"  # "roberta-base"
+    model_path = "cardiffnlp/twitter-roberta-base-2022-154m" #"cardiffnlp/twitter-roberta-base-emotion"  # "roberta-base"
 elif model_name == 'xlnet':
     model_path = "xlnet/xlnet-base-cased"  # "xlnet-base-cased"
 elif model_name == 'xlm':
@@ -123,7 +123,7 @@ test_data_loader = load_data(test_examples,
                              max_seq_length,
                              train_batch_size,
                              DataType.TEST, model_name)
-#testing = Evaluation(test_data_loader, model_name, args.output, len(label_list), model_name)
+testing = Evaluation(test_data_loader, model_name, args.output, len(label_list), model_name)
 
 num_train_steps = len(training_data_loader) * args.epochs
 
@@ -146,8 +146,8 @@ results_per_epoch = train(device,
                           False,
                           experiment_name=model_name,
                           output_dir=args.output,
-                          model_type=model_name,)
- #                         testing=testing)
+                          model_type=model_name,
+                          testing=testing)
 train_time = time.process_time() - start_time
 
 # Testing

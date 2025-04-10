@@ -22,8 +22,6 @@ docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/outpu
 
 ## Apptainer
 
-WARNING: This method doesn't use GPUs.
-
 ```bash
 mkdir -p ../../apptainer ../../output/emtransformer
 apptainer build ../../apptainer/emtransformer.sif container.def

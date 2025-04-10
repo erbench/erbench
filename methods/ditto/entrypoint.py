@@ -33,7 +33,7 @@ parser.add_argument('-s', '--seed', type=int, nargs='?', default=random.randint(
                     help='The random state used to initialize the algorithms and split dataset')
 parser.add_argument('-e', '--epochs', type=int, nargs='?', default=10,
                     help='Number of epochs to train the model')
-parser.add_argument('-lm', '--languagemodel', type=str, nargs='?', default='RoBERTa',
+parser.add_argument('-m', '--model', type=str, nargs='?', default='RoBERTa',
                     help='The language model to use', choices=['RoBERTa', 'DistilBERT'])
 args = parser.parse_args()
 
@@ -74,7 +74,7 @@ hyperparameters = namedtuple('hyperparameters', ['lm', #language Model
                                                  'size',#dataset size
                                                  'run_id'])
 
-hp = hyperparameters(lm = args.languagemodel.lower(),
+hp = hyperparameters(lm = args.model.lower(),
                      n_epochs = args.epochs,
                      batch_size = 64,
                      max_len = 256,

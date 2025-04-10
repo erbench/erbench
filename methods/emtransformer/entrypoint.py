@@ -29,7 +29,7 @@ parser.add_argument('-s', '--seed', type=int, nargs='?', default=random.randint(
                     help='The random state used to initialize the algorithms and split dataset')
 parser.add_argument('-e', '--epochs', type=int, nargs='?', default=5,  # 15.0
                     help='Number of epochs to train the model')
-parser.add_argument('-lm', '--languagemodel', type=str, nargs='?', default='RoBERTa',
+parser.add_argument('-m', '--model', type=str, nargs='?', default='RoBERTa',
                     help='The language model to use', choices=['BERT', 'RoBERTa', 'DistilBERT', 'XLNet'])
 args = parser.parse_args()
 
@@ -61,7 +61,7 @@ label_list = [0, 1]
 print("training with {} labels: {}".format(len(label_list), label_list))
 
 # Step 2. Run the method
-model_name = args.languagemodel.lower()
+model_name = args.model.lower()
 max_seq_length = 128
 train_batch_size = 16
 

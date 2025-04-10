@@ -1,17 +1,16 @@
-import sys
 import argparse
-from os import path
+import time
 import os
 import random
 import pathtype
 import pandas as pd
 import numpy as np
+
 from itertools import product
 from sklearn.model_selection import train_test_split
-import time
 
 
-def generate_candidates(tableA_df, tableB_df, matches_df, recall=0.7, neg_pairs_ratio=10, seed=1):
+def generate_candidates(tableA_df, tableB_df, matches_df, recall, neg_pairs_ratio, seed):
 
     ac_tableA = list(tableA_df.columns)
     ac_tableA.remove('id')
@@ -80,7 +79,7 @@ def generate_candidates(tableA_df, tableB_df, matches_df, recall=0.7, neg_pairs_
     pairs = pd.concat([pos_pairs, neg_pairs]).reset_index(drop=True)
     return pairs
 
-def split_input(tableA_df, tableB_df, matches_df, recall=0.9, neg_pairs_ratio=10, seed=1, valid=True):
+def split_input(tableA_df, tableB_df, matches_df, recall, neg_pairs_ratio, seed, valid=True):
     candidates = generate_candidates(tableA_df, tableB_df, matches_df, recall=recall,
                                      neg_pairs_ratio=neg_pairs_ratio, seed=seed)
 
@@ -128,9 +127,9 @@ if __name__ == "__main__":
         exit(1)
 
     print("Hi, I'm simple splitter, I'm doing random split of the input datasets into train and test sets.")
-    tableA_df = pd.read_csv(path.join(args.input, 'tableA.csv'), encoding_errors='replace')
-    tableB_df = pd.read_csv(path.join(args.input, 'tableB.csv'), encoding_errors='replace')
-    matches_df = pd.read_csv(path.join(args.input, 'matches.csv'), encoding_errors='replace')
+    tableA_df = pd.read_csv(os.path.join(args.input, 'tableA.csv'), encoding_errors='replace')
+    tableB_df = pd.read_csv(os.path.join(args.input, 'tableB.csv'), encoding_errors='replace')
+    matches_df = pd.read_csv(os.path.join(args.input, 'matches.csv'), encoding_errors='replace')
 
     tableA_df.set_index('id', inplace=True, drop=False)
     tableB_df.set_index('id', inplace=True, drop=False)
@@ -148,20 +147,21 @@ if __name__ == "__main__":
     stop_time = time.process_time()
     print("Done! Train size: {}, test size: {}.".format(train.shape[0], test.shape[0]))
 
-    train.to_csv(path.join(args.output, "train.csv"), index=False)
-    valid.to_csv(path.join(args.output, "valid.csv"), index=False)
-    test.to_csv(path.join(args.output, "test.csv"), index=False)
+    train.to_csv(os.path.join(args.output, "train.csv"), index=False)
+    valid.to_csv(os.path.join(args.output, "valid.csv"), index=False)
+    test.to_csv(os.path.join(args.output, "test.csv"), index=False)
 
     tableA_df.to_csv(os.path.join(args.output, 'tableA.csv'), index=False)
     tableB_df.to_csv(os.path.join(args.output, 'tableB.csv'), index=False)
     matches_df.to_csv(os.path.join(args.output, 'matches.csv'), index=False)
 
-    metrics_file = open(os.path.join(args.output, "filtering_metrics.txt"), 'w')
-    cols = ['f1', 'precision', 'recall', 'filtering_time', 'num_candidates', 'entries_tableA', 'entries_tableB',
-            'entries_matches']
-    stats = stats[:3] + [stop_time - start_time] + [stats[3]] + [tableA_df.shape[0], tableB_df.shape[0],
-                                                                 matches_df.shape[0]]
-    print(*cols, file=metrics_file, sep=',')
-    print(*stats, file=metrics_file, sep=',')
-    metrics_file.close()
-
+    pd.DataFrame({
+        'f1': [stats[0]],
+        'precision': [stats[1]],
+        'recall': [stats[2]],
+        'filtering_time': [stop_time - start_time],
+        'num_candidates': [stats[3]],
+        'entries_tableA': [tableA_df.shape[0]],
+        'entries_tableB': [tableB_df.shape[0]],
+        'entries_matches': [matches_df.shape[0]],
+    }).to_csv(os.path.join(args.output, 'filtering_metrics.csv'), index=False)

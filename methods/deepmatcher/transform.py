@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import torch
 
-def transform_input(source_dir, output_dir,prefixes=['tableA_', 'tableB_']):
+def transform_input(source_dir, output_dir, prefixes=['tableA_', 'tableB_']):
     train_data = pd.read_csv(os.path.join(source_dir, 'train.csv'), encoding_errors='replace')
     test_data = pd.read_csv(os.path.join(source_dir, 'test.csv'), encoding_errors='replace')
     valid_data = pd.read_csv(os.path.join(source_dir, 'valid.csv'), encoding_errors='replace')
@@ -29,9 +29,9 @@ def transform_input(source_dir, output_dir,prefixes=['tableA_', 'tableB_']):
         valid_data = valid_data[final_columns]
         test_data = test_data[final_columns]
 
-    train_data.to_csv(os.path.join(output_dir, 'train.csv'), index_label='id')
-    test_data.to_csv(os.path.join(output_dir, 'test.csv'), index_label='id')
-    valid_data.to_csv(os.path.join(output_dir, 'valid.csv'), index_label='id')
+    train_data.to_csv(os.path.join(output_dir, 'train_dm.csv'), index_label='id')
+    test_data.to_csv(os.path.join(output_dir, 'test_dm.csv'), index_label='id')
+    valid_data.to_csv(os.path.join(output_dir, 'valid_dm.csv'), index_label='id')
     return None
 
 def transform_output(predictions, data, stats, results_per_epoch, train_time, eval_time, dest_dir):

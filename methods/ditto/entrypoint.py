@@ -170,8 +170,3 @@ scores = softmax(logits, axis=1)
 eval_time = time.process_time() - start_time
 
 transform_output(scores, threshold, results_per_epoch, test_ids, labels, train_time, eval_time, args.output)
-
-# Step 4. Delete temporary files
-for file in os.listdir(temp_output):
-    if os.path.isfile(os.path.join(temp_output, file)):
-        os.remove(os.path.join(temp_output, file))

@@ -38,9 +38,9 @@ transform_input(args.input, args.output)
 
 # Step 1. Convert input data into the format expected by the method
 datasets = dm.data.process(path=args.output,
-                           train="train.csv",
-                           validation="valid.csv",
-                           test="test.csv",
+                           train="train_dm.csv",
+                           validation="valid_dm.csv",
+                           test="test_dm.csv",
                            id_attr='id',
                            label_attr='label',
                            left_prefix='tableA_',
@@ -66,8 +66,3 @@ eval_time = time.process_time() - start_time
 test_data =  pd.read_csv(os.path.join(args.input, 'test.csv'), encoding_errors='replace')
 transform_output(predictions,test_data, stats, results_per_epoch, train_time, eval_time, args.output)
 print("Final output: ", os.listdir(args.output))
-
-# Step 4. Clean Output
-os.remove(os.path.join(args.output, 'train.csv'))
-os.remove(os.path.join(args.output, 'valid.csv'))
-os.remove(os.path.join(args.output, 'test.csv'))

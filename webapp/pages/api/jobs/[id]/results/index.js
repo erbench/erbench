@@ -6,9 +6,7 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const results = await prisma.result.findUnique({
-        where: {
-          jobId: jobId,
-        }
+        where: {jobId}
       });
 
       return res.status(200).json(results);
@@ -19,68 +17,18 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST' || req.method === 'PUT') {
-    if (!req.body.status) {
+    const {status, ...rest} = req.body;
+
+    if (!status) {
       return res.status(400).json({error: 'status is required'});
     }
 
-    if (req.body.status === 'completed') {
+    if (status === 'matching' || status === 'completed') {
       try {
         await prisma.result.upsert({
-          where: {
-            jobId: jobId,
-          },
-          update: {
-            filteringF1: req.body.filteringF1,
-            filteringPrecision: req.body.filteringPrecision,
-            filteringRecall: req.body.filteringRecall,
-            filteringTime: req.body.filteringTime,
-            filteringCandidates: req.body.filteringCandidates,
-            filteringEntriesA: req.body.filteringEntriesA,
-            filteringEntriesB: req.body.filteringEntriesB,
-            filteringMatches: req.body.filteringMatches,
-
-            f1: req.body.f1,
-            precision: req.body.precision,
-            recall: req.body.recall,
-            trainTime: req.body.trainTime,
-            evalTime: req.body.evalTime,
-
-            cpuAllocated: req.body.cpuAllocated,
-            cpuUtilized: req.body.cpuUtilized,
-            memUtilized: req.body.memUtilized,
-            gpuAllocated: req.body.gpuAllocated,
-            gpuUtilized: req.body.gpuUtilized,
-            gpuMemUtilized: req.body.gpuMemUtilized,
-            energyConsumed: req.body.energyConsumed,
-            totalRuntime: req.body.totalRuntime,
-          },
-          create: {
-            jobId: jobId,
-
-            filteringF1: req.body.filteringF1,
-            filteringPrecision: req.body.filteringPrecision,
-            filteringRecall: req.body.filteringRecall,
-            filteringTime: req.body.filteringTime,
-            filteringCandidates: req.body.filteringCandidates,
-            filteringEntriesA: req.body.filteringEntriesA,
-            filteringEntriesB: req.body.filteringEntriesB,
-            filteringMatches: req.body.filteringMatches,
-
-            f1: req.body.f1,
-            precision: req.body.precision,
-            recall: req.body.recall,
-            trainTime: req.body.trainTime,
-            evalTime: req.body.evalTime,
-
-            cpuAllocated: req.body.cpuAllocated,
-            cpuUtilized: req.body.cpuUtilized,
-            memUtilized: req.body.memUtilized,
-            gpuAllocated: req.body.gpuAllocated,
-            gpuUtilized: req.body.gpuUtilized,
-            gpuMemUtilized: req.body.gpuMemUtilized,
-            energyConsumed: req.body.energyConsumed,
-            totalRuntime: req.body.totalRuntime,
-          }
+          where: {jobId},
+          update: rest,
+          create: {jobId, ...rest}
         });
       } catch (error) {
         console.error("Error updating job results:", error);
@@ -90,12 +38,8 @@ export default async function handler(req, res) {
 
     try {
       await prisma.job.update({
-        where: {
-          id: jobId,
-        },
-        data: {
-          status: req.body.status
-        }
+        where: {id: jobId},
+        data: {status}
       });
 
       return res.status(200).end();

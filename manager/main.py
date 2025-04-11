@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from erbench.client import ErbenchClient, JobStatus, Job
-from erbench.importer import import_results, import_slurm_metrics, import_predictions
+from erbench.importer import import_results, import_slurm_metrics, import_predictions, import_filtering_results
 
 DATASETS_DIR = os.getenv("DATASETS_DIR", "../datasets")
 CONTAINERS_DIR = os.getenv("CONTAINERS_DIR", "../apptainer")
@@ -38,8 +38,18 @@ def render_params(params: dict) -> str:
     return ' '.join([f'--{k}' if v is True else f'--{k}="{v}"' if isinstance(v, str) and ' ' in v else f'--{k}={v}' for k, v in params.items() if v is not None])
 
 
+def import_filtering_job(job_id: str, input_dir: any, slurm_job_id: int = None):
+    print(f"Importing filtering results from {input_dir}")
+    results = import_filtering_results(input_dir)
+    if not results:
+        raise RuntimeError(f"Error importing filtering results for job {job_id}")
+
+    erbench_client.send_results(job_id, JobStatus.MATCHING, results)
+    print("Filtering results uploaded successfully")
+
+
 def import_job(job_id: str, input_dir: any, slurm_job_id: int = None):
-    print(f"Importing results for job {job_id} from {input_dir}")
+    print(f"Importing results from {input_dir}")
 
     slurm_job_str = None
     if slurm_job_id:
@@ -54,7 +64,8 @@ def import_job(job_id: str, input_dir: any, slurm_job_id: int = None):
             print(f"Warning: Error retrieving Slurm metrics: {str(e)}")
 
     results = import_results(input_dir)
-    if not results: exit(1)
+    if not results:
+        raise RuntimeError(f"Error importing results for job {job_id}")
 
     if slurm_job_str:
         results = import_slurm_metrics(slurm_job_str, results)
@@ -64,7 +75,8 @@ def import_job(job_id: str, input_dir: any, slurm_job_id: int = None):
     print("Results upload completed successfully")
 
     predictions = import_predictions(input_dir)
-    if not predictions: exit(1)
+    if not predictions:
+        raise RuntimeError(f"Error importing predictions for job {job_id}")
 
     erbench_client.send_predictions(job_id, predictions)
     print("Predictions upload completed successfully")
@@ -151,35 +163,47 @@ def start_job(job: Job):
         print(f"Error executing job: {str(e)}")
 
 
+def get_job_status(slurm_job_id) -> str:
+    process = subprocess.run(['sacct', '-j', str(slurm_job_id), '--format=State', '--parsable2', '--noheader'], capture_output=True, text=True)
+    if process.returncode != 0:
+        raise RuntimeError(f"Error checking job status: {process.stderr}")
+    return process.stdout.strip().split('\n')[0]
+
+
+def cancel_job(slurm_job_id):
+    print(f"Cancelling job {slurm_job_id}")
+    process = subprocess.run(['scancel', str(slurm_job_id)], capture_output=True, text=True)
+    if process.returncode != 0:
+        raise RuntimeError(f"Error cancelling job: {process.stderr}")
+    print(f"Job {slurm_job_id} cancelled")
+
+
 def check_job(job: Job):
-    filtering_job_id = job['filteringSlurmId']
-    matching_job_id = job['matchingSlurmId']
-
     try:
-        filtering_process = subprocess.run(['sacct', '-j', str(filtering_job_id), '--format=State', '--parsable2', '--noheader'], capture_output=True, text=True)
-        if filtering_process.returncode != 0:
-            raise RuntimeError(f"Error checking filtering job status: {filtering_process.stderr}")
+        job_dir = get_job_directory(job['id'])
 
-        matching_process = subprocess.run(['sacct', '-j', str(matching_job_id), '--format=State', '--parsable2', '--noheader'], capture_output=True, text=True)
-        if matching_process.returncode != 0:
-            raise RuntimeError(f"Error checking matching job status: {matching_process.stderr}")
+        if job['status'] == JobStatus.QUEUED or job['status'] == JobStatus.FILTERING:
+            filtering_status = get_job_status(job['filteringSlurmId'])
+            print(f"Filtering status: {filtering_status}")
 
-        filtering_status = filtering_process.stdout.strip().split('\n')[0]
-        matching_status = matching_process.stdout.strip().split('\n')[0]
+            if filtering_status == 'RUNNING' or filtering_status == 'COMPLETING':
+                if job['status'] != JobStatus.FILTERING:
+                    erbench_client.update_job(job['id'], JobStatus.FILTERING)
+                return
+            elif filtering_status == 'COMPLETED':
+                import_filtering_job(job['id'], job_dir, job['filteringSlurmId'])
+            elif filtering_status == 'FAILED':
+                erbench_client.update_job(job['id'], JobStatus.FAILED)
+                cancel_job(job['matchingSlurmId'])
+                print(f"Job {job['id']} failed")
+                return
 
-        print(f"Filtering job {filtering_job_id} status: {filtering_status}")
-        print(f"Matching job {matching_job_id} status: {matching_status}")
+        matching_status = get_job_status(job['matchingSlurmId'])
+        print(f"Matching status: {matching_status}")
 
-        if filtering_status == 'RUNNING':
-            erbench_client.update_job(job['id'], JobStatus.FILTERING)
-            return
-        elif matching_status == 'RUNNING':
-            erbench_client.update_job(job['id'], JobStatus.MATCHING)
-            return
-        elif filtering_status == 'COMPLETED' and matching_status == 'COMPLETED':
-            job_dir = get_job_directory(job['id'])
+        if matching_status == 'COMPLETED':
             print(f"Importing results for job {job['id']} from {job_dir}")
-            import_job(job['id'], job_dir, matching_job_id)
+            import_job(job['id'], job_dir, job['matchingSlurmId'])
 
             # Clean up the job directory after successful import
             print(f"Cleaning up job directory: {job_dir}")
@@ -188,10 +212,11 @@ def check_job(job: Job):
                 print(f"Job directory {job_dir} removed successfully")
             except Exception as e:
                 print(f"Warning: Failed to remove job directory: {str(e)}")
-        elif filtering_status == 'FAILED' or matching_status == 'FAILED':
+        elif matching_status == 'FAILED':
             erbench_client.update_job(job['id'], JobStatus.FAILED)
             print(f"Job {job['id']} failed")
     except Exception as e:
+        erbench_client.update_job(job['id'], JobStatus.FAILED)
         print(f"Error checking job status: {str(e)}")
 
 

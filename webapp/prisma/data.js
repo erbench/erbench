@@ -1,7 +1,7 @@
 export const algorithms = [
   // splitters
   {code: 'splitter_random', name: 'Random Split', scenarios: ['filtering'], params: {recall: 'number', neg_pairs_ratio: 'number'}},
-  {code: 'splitter_deepblocker', name: 'DeepBlocker', scenarios: ['filtering'], params: {recall: 'number'}},
+  {code: 'splitter_deepblocker', name: 'DeepBlocker', scenarios: ['filtering'], params: {recall: 'dropdown=0.85|0.90|0.95'}},
   {code: 'splitter_knnjoin', name: 'top kNN-Join', scenarios: ['filtering'], params: {recall: 'dropdown=0.85|0.90|0.95', 'default': 'boolean'}},
   // matchers
   {code: 'deepmatcher', name: 'DeepMatcher', scenarios: ['matching'], params: {epochs: 'number'}},

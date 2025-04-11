@@ -214,7 +214,7 @@ export default function ViewJob({job}) {
               )}
               {job.result.filteringEntriesB !== null && (
                 <div className="flex justify-content-between">
-                  <span className="font-medium">Entities in Table A:</span>
+                  <span className="font-medium">Entities in Table B:</span>
                   <span>{Number(job.result.filteringEntriesB)}</span>
                 </div>
               )}

@@ -68,15 +68,15 @@ export const renderFilteringResults = (result) => {
     <div className="flex flex-column text-xs">
       <div className="flex justify-content-between">
         <span className="font-medium">F1 Score:</span>
-        <span className="white-space-nowrap">{result.filteringF1 !== null ? result.filteringF1.toFixed(6) : 'N/A'}</span>
+        <span className="white-space-nowrap">{result.filteringF1 !== null ? result.filteringF1.toFixed(3) : 'N/A'}</span>
       </div>
       <div className="flex justify-content-between">
         <span className="font-medium">Precision:</span>
-        <span className="white-space-nowrap">{result.filteringPrecision !== null ? result.filteringPrecision.toFixed(6) : 'N/A'}</span>
+        <span className="white-space-nowrap">{result.filteringPrecision !== null ? result.filteringPrecision.toFixed(3) : 'N/A'}</span>
       </div>
       <div className="flex justify-content-between">
         <span className="font-medium">Recall:</span>
-        <span className="white-space-nowrap">{result.filteringRecall !== null ? result.filteringRecall.toFixed(6) : 'N/A'}</span>
+        <span className="white-space-nowrap">{result.filteringRecall !== null ? result.filteringRecall.toFixed(3) : 'N/A'}</span>
       </div>
       {result.filteringTime !== null && (
         <div className="flex justify-content-between">

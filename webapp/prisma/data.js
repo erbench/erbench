@@ -23,7 +23,7 @@ export const datasets = [
   {code: 'd7_tmdb_tvdb', name: 'TMDB-TVDB (Movies)'},
   {code: 'd8_amazon_walmart', name: 'Amazon-Walmart (Electronics)'},
   {code: 'd9_dblp_scholar', name: 'DBLP-Scholar (Citations)'},
-  {code: 'd10_imdb_dbpedia', name: 'IMDB-DBPedia (Movies)'},
-  {code: 'd11_itunes_amazon', name: 'iTunes-Amazon (Music)'},
-  {code: 'd12_beeradvo_ratebeer', name: 'BeerAdvo-RateBeer (Beer)'},
+  // {code: 'd10_imdb_dbpedia', name: 'IMDB-DBPedia (Movies)'},
+  // {code: 'd11_itunes_amazon', name: 'iTunes-Amazon (Music)'},
+  // {code: 'd12_beeradvo_ratebeer', name: 'BeerAdvo-RateBeer (Beer)'},
 ];

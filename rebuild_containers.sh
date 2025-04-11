@@ -17,6 +17,7 @@ METHODS=(
 
 COMMAND="apptainer build --force"
 MAX_PARALLEL=5
+FAILED_LIST=$(mktemp)  # Create a temporary file to track failed tasks
 
 log() {
     local timestamp=$(date "+%Y-%m-%d %H:%M:%S");
@@ -39,6 +40,7 @@ process_container() {
 
     if [ ! -d "$folder" ]; then
         log "❌ Error: Folder does not exist: $folder"
+        echo "$name" >> "$FAILED_LIST"  # Record failure
         return 1
     fi
 
@@ -51,6 +53,7 @@ process_container() {
         return 0
     else
         log "❌ Failed: $name (exit code: $result)"
+        echo "$name" >> "$FAILED_LIST"  # Record failure
         return 1
     fi
 }
@@ -92,8 +95,12 @@ echo "=== Summary ==="
 echo "Total folders: ${#METHODS[@]}"
 if [ $failures -eq 0 ]; then
     log "✅ All folders processed successfully."
+    rm -f "$FAILED_LIST"  # Clean up temporary file
     exit 0
 else
     log "❌ $failures folder(s) failed. Check the output above for details."
+    echo "Failed tasks:"
+    cat "$FAILED_LIST" | sort | uniq | sed 's/^/  - /'  # Print formatted list of failed tasks
+    rm -f "$FAILED_LIST"  # Clean up temporary file
     exit 1
 fi

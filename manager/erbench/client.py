@@ -89,7 +89,6 @@ class Prediction(TypedDict):
 
 
 class ErbenchClient:
-
     def __init__(self):
         self.base_url = os.getenv("API_BASE_URL", "https://demo5.kbs.uni-hannover.de")
         self.api_key = os.getenv("API_KEY")
@@ -105,8 +104,8 @@ class ErbenchClient:
         response.raise_for_status()
 
         json = response.json()
-        if response.status_code == 200 and json['data']:
-            return json['data']
+        if response.status_code == 200 and json["data"]:
+            return json["data"]
         else:
             return []
 
@@ -130,10 +129,7 @@ class ErbenchClient:
         url = f"{self.base_url}/api/jobs/{job_id}/results"
         headers = self._get_headers()
 
-        response = requests.put(url, headers=headers, json={
-            "status": status.value,
-            **metrics
-        })
+        response = requests.put(url, headers=headers, json={"status": status.value, **metrics})
         response.raise_for_status()
         return response
 

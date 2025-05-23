@@ -46,7 +46,7 @@ def transform_input(source_dir, prefixes=['tableA_', 'tableB_'], use_full=True):
     return test_df, tableA_df, tableB_df, matches_df
 
 
-def transform_output(predictions, results_per_iteration, train_time, eval_time, dest_dir):
+def transform_output(predictions, results_per_iteration, train_time, eval_time, preprocess_time, dest_dir):
     """
     Transform the output of the method into two common format files, which are stored in the destination directory.
     metrics.csv: f1, precision, recall, train_time, eval_time (1 row, 5 columns, with header)
@@ -74,12 +74,13 @@ def transform_output(predictions, results_per_iteration, train_time, eval_time, 
         'f1': [f1],
         'precision': [true_positives / num_candidates],
         'recall': [true_positives / ground_truth],
+        'preprocess_time': [preprocess_time],
         'train_time': [train_time],
         'eval_time': [eval_time],
     }).to_csv(os.path.join(dest_dir, 'metrics.csv'), index=False)
 
     pd.DataFrame(results_per_iteration,
-                 columns=['iteration', 'f1', 'precision', 'recall', 'eval_time']
+                 columns=['iteration', 'f1', 'precision', 'recall', 'iteration_time', 'eval_time']
                  ).to_csv(os.path.join(dest_dir, 'metrics_per_iteration.csv'), index=False)
 
     return None

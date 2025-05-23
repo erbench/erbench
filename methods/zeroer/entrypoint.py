@@ -12,6 +12,13 @@ import numpy as np
 import utils
 import time
 
+def add_catalog_information(df, tableA, tableB):
+    em.set_ltable(df, tableA)
+    em.set_rtable(df, tableB)
+    em.set_fk_ltable(df, 'ltable_id')
+    em.set_fk_rtable(df, 'rtable_id')
+    em.set_key(df, '_id')
+
 parser = argparse.ArgumentParser(description='Benchmark a dataset with a method')
 parser.add_argument('input', type=pathtype.Path(readable=True), nargs='?', default='/data',
                     help='Input directory containing the dataset')
@@ -41,17 +48,15 @@ else:
 
 excl_attributes = ['_id', 'ltable_id', 'rtable_id', 'label']
 
-def add_catalog_information(df, tableA, tableB):
-    em.set_ltable(df, tableA)
-    em.set_rtable(df, tableB)
-    em.set_fk_ltable(df, 'ltable_id')
-    em.set_fk_rtable(df, 'rtable_id')
-    em.set_key(df, '_id')
+
     
 read_prefixes = ['tableA_', 'tableB_']
-
+t_input = time.process_time()
 dataset, tableA, tableB, GT = transform_input(args.input, read_prefixes, args.full)
+print(f'Input reading done after {time.process_time() - t_input:.4f}s')
 
+prep_time = time.process_time()
+prep_time2 = time.perf_counter()
 em.set_key(tableA, 'id')
 em.set_key(tableB, 'id')
 add_catalog_information(dataset, tableA, tableB)
@@ -59,6 +64,10 @@ add_catalog_information(dataset, tableA, tableB)
 id_df = dataset[["ltable_id", "rtable_id"]]
 cand_features = gather_features_and_labels(tableA, tableB, GT, dataset)
 sim_features = gather_similarity_features(cand_features)
+prep_time = time.process_time() - prep_time
+prep_time2 = time.perf_counter() - prep_time2
+print(f'preprocessing done after {prep_time:.4f}s')
+print(f'preprocessing time perf_counter {prep_time2:.4f}s')
 
 sim_features_lr = (None,None)
 id_dfs = (id_df, None, None)
@@ -68,11 +77,18 @@ if np.sum(true_labels)==0:
     true_labels = None
 
 start_time = time.process_time()
+eval2 = time.perf_counter()
 y_pred, results_per_iteration = utils.run_zeroer(sim_features, sim_features_lr,id_dfs,
                     true_labels , LR_dup_free= True, LR_identical=False, run_trans=True)
 eval_time = time.process_time() - start_time
+eval2 = time.perf_counter() - eval2
+print(f"Evaluation done after {eval_time:.4f}s")
+print(f"evaluation time after perf_counter: {eval2:.4f}s")
 
 pred_df = cand_features.copy()
 pred_df['pred'] = y_pred
 
-transform_output(pred_df, results_per_iteration, 0, eval_time, args.output)
+transform_output(pred_df, results_per_iteration, 0, eval_time, prep_time, args.output)
+
+#Evaluation done after 76.4864s
+#evaluation time after perf_counter: 9.9671s

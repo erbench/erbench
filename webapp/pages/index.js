@@ -130,7 +130,7 @@ export default function Home({datasets, algorithms}) {
 
   return <div>
     <Head>
-      <title>Submit a new job | ERBench</title>
+      <title>Submit a new job | SMBench</title>
       <meta name="description" content="On this page you can submit a new job for entity resolution benchmarking"/>
     </Head>
 

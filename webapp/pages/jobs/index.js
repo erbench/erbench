@@ -60,7 +60,7 @@ export default function ListJobs({jobs, filterEmail}) {
     return (
       <div>
         <Head>
-          <title>Jobs for {filterEmail} | ERBench</title>
+          <title>Jobs for {filterEmail} | SMBench</title>
           <meta name="description" content={`Jobs filtered by email ${filterEmail}`}/>
         </Head>
 
@@ -81,7 +81,7 @@ export default function ListJobs({jobs, filterEmail}) {
 
   return <div>
     <Head>
-      <title>{filterEmail ? `Jobs for ${filterEmail}` : 'All jobs list'} | ERBench</title>
+      <title>{filterEmail ? `Jobs for ${filterEmail}` : 'All jobs list'} | SMBench</title>
       <meta name="description" content={filterEmail ? `Jobs filtered by email ${filterEmail}` : "List of submitted jobs for entity resolution"}/>
     </Head>
 

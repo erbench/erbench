@@ -88,7 +88,7 @@ def send_email_notification(job_id: str, notify_email: str):
     try:
         msg = EmailMessage()
         msg.set_content(f"Your entity resolution job {job_id} has been completed.\n\nYou can view the results at {ERBENCH_URL}/jobs/{job_id}")
-        msg["Subject"] = f"[{job_id}] ERBench Job Completed"
+        msg["Subject"] = f"[{job_id}] SMBench Job Completed"
         msg["From"] = os.getenv("EMAIL_FROM")
         msg["To"] = notify_email
         msg["Date"] = datetime.now().strftime("%a, %d %b %Y %H:%M:%S %z")
@@ -265,11 +265,11 @@ def run_job():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="ERBench Manager CLI")
+    parser = argparse.ArgumentParser(description="SMBench Manager CLI")
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
     import_parser = subparsers.add_parser("import", help="Import results into database")
-    import_parser.add_argument("job_id", type=str, help="The job ID in the ERBench database")
+    import_parser.add_argument("job_id", type=str, help="The job ID in the SMBench database")
     import_parser.add_argument("input_dir", type=pathtype.Path(readable=True), help="The input directory containing the results")
     import_parser.add_argument("-sj", "--slurm-job-id", type=int, default=None, help="Slurm job ID, used to gather utilization metrics")
     import_parser.set_defaults(func=import_job)
@@ -278,7 +278,7 @@ if __name__ == "__main__":
     run_parser.set_defaults(func=run_job)
 
     test_email = subparsers.add_parser("test-email", help="Send test email")
-    test_email.add_argument("job_id", type=str, help="The job ID in the ERBench database")
+    test_email.add_argument("job_id", type=str, help="The job ID in the SMBench database")
     test_email.add_argument("notify_email", type=str, help="The email address to send the notification to")
     test_email.set_defaults(func=send_email_notification)
 

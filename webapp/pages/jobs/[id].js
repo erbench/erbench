@@ -107,7 +107,7 @@ export default function ViewJob({job}) {
 
   return <div>
     <Head>
-      <title>Job: {job.id} | ERBench</title>
+      <title>Job: {job.id} | SMBench</title>
       <meta name="description" content={`Job ${job.id} details, including status, parameters, and results.`}/>
     </Head>
 

@@ -1,4 +1,4 @@
-# ERBench Task Manager
+# SMBench Task Manager
 
 ## Setup
 

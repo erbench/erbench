@@ -83,6 +83,11 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
       const data = await queryJobs(req.body);
+
+      for (const job of data.data) {
+        job.notifyEmail = undefined;
+      }
+
       return res.status(200).json(data);
     } catch (error) {
       console.error("Error fetching jobs:", error);

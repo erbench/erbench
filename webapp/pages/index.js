@@ -105,7 +105,7 @@ export default function Home({datasets, algorithms}) {
       }
     }
 
-    const response = await fetch('/api/jobs', {
+    const response = await fetch('/api/jobs/submit', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',

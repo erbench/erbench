@@ -30,7 +30,8 @@ export const statusRowFilterTemplate = (options, statuses) => {
 };
 
 export const dropdownFilterTemplate = (options, possibleOptions) => {
-  return <Dropdown value={options.value} options={possibleOptions} placeholder="Select One" className="p-column-filter" showClear
+  const sortedOptions = possibleOptions ? [...possibleOptions].sort((a, b) => a.localeCompare(b)) : [];
+  return <Dropdown value={options.value} options={sortedOptions} placeholder="Select One" className="p-column-filter" showClear
                    onChange={(e) => options.filterApplyCallback(e.value)}/>;
 };
 

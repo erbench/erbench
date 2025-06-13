@@ -13,8 +13,8 @@ import {renderDate, renderParams} from "../utils/jobUtils";
 import Head from "next/head";
 
 export const getServerSideProps = async ({req}) => {
-  const algorithms = await prisma.algorithm.findMany();
-  const datasets = await prisma.dataset.findMany();
+  const algorithms = await prisma.algorithm.findMany({ orderBy: { id: 'asc' } });
+  const datasets = await prisma.dataset.findMany({ orderBy: { name: 'asc' } });
 
   return {
     props: {

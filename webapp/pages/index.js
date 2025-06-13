@@ -198,7 +198,7 @@ export default function Home({datasets, algorithms}) {
             <Checkbox id="filtering-default" aria-describedby="filtering-default-help" className="w-full"
                       checked={filteringDefault} onChange={e => setFilteringDefault(e.checked)}
                       disabled={formDisabled}/>
-            <small id="filtering-default-help">Whether to use default settings or file-tuned for per dataset</small>
+            <small id="filtering-default-help">Whether to use default settings or fine-tuned for the dataset</small>
           </div>
         )}
 

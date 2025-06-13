@@ -13,7 +13,7 @@ load_dotenv()
 from erbench.client import ErbenchClient, JobStatus, Job
 from erbench.importer import import_results, import_slurm_metrics, import_predictions, import_filtering_results
 
-ERBENCH_URL = os.getenv("API_BASE_URL", "https://demo5.kbs.uni-hannover.de")
+ERBENCH_URL = os.getenv("API_BASE_URL", "https://smbench.kbs.uni-hannover.de")
 DATASETS_DIR = os.getenv("DATASETS_DIR", "../datasets")
 CONTAINERS_DIR = os.getenv("CONTAINERS_DIR", "../apptainer")
 EMBEDDINGS_DIR = os.getenv("EMBEDDINGS_DIR", "../embeddings")

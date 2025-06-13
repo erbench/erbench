@@ -90,7 +90,7 @@ class Prediction(TypedDict):
 
 class ErbenchClient:
     def __init__(self):
-        self.base_url = os.getenv("API_BASE_URL", "https://demo5.kbs.uni-hannover.de")
+        self.base_url = os.getenv("API_BASE_URL", "https://smbench.kbs.uni-hannover.de")
         self.api_key = os.getenv("API_KEY")
 
         if not self.base_url:

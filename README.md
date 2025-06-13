@@ -1,4 +1,4 @@
-# No-code Benchmarking of Entity Resolution
+# SMBench: No-code Benchmarking of Learning-based Entity Matching
 
 https://swimlanes.io/u/k3Rmy375P
 

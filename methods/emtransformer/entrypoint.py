@@ -72,7 +72,7 @@ if model_name == 'bert':
 elif model_name == 'distilbert':
     model_path = "distilbert-base-uncased"
 elif model_name == 'roberta':
-    model_path = "cardiffnlp/twitter-roberta-base-2022-154m" #"cardiffnlp/twitter-roberta-base-emotion"  # "roberta-base"
+    model_path = "FacebookAI/roberta-base" #"cardiffnlp/twitter-roberta-base-emotion"  # "roberta-base"
 elif model_name == 'xlnet':
     model_path = "xlnet/xlnet-base-cased"  # "xlnet-base-cased"
 elif model_name == 'xlm':

@@ -20,6 +20,13 @@ You can override the input and output directories by providing them as arguments
 docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/output emtransformer /data/input /data/output
 ```
 
+To download models, you need to have Huggingface authentication set up.
+You can do this by running:
+
+```bash
+huggingface-cli login --token $HF_TOKEN
+```
+
 ## Apptainer
 
 ```bash

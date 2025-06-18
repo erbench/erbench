@@ -51,12 +51,11 @@ excl_attributes = ['_id', 'ltable_id', 'rtable_id', 'label']
 
     
 read_prefixes = ['tableA_', 'tableB_']
-t_input = time.process_time()
+t_input = time.perf_counter()
 dataset, tableA, tableB, GT = transform_input(args.input, read_prefixes, args.full)
-print(f'Input reading done after {time.process_time() - t_input:.4f}s')
+print(f'Input reading done after {time.perf_counter() - t_input:.4f}s')
 
-prep_time = time.process_time()
-prep_time2 = time.perf_counter()
+prep_time = time.perf_counter()
 em.set_key(tableA, 'id')
 em.set_key(tableB, 'id')
 add_catalog_information(dataset, tableA, tableB)
@@ -64,10 +63,9 @@ add_catalog_information(dataset, tableA, tableB)
 id_df = dataset[["ltable_id", "rtable_id"]]
 cand_features = gather_features_and_labels(tableA, tableB, GT, dataset)
 sim_features = gather_similarity_features(cand_features)
-prep_time = time.process_time() - prep_time
-prep_time2 = time.perf_counter() - prep_time2
+prep_time = time.perf_counter() - prep_time
+
 print(f'preprocessing done after {prep_time:.4f}s')
-print(f'preprocessing time perf_counter {prep_time2:.4f}s')
 
 sim_features_lr = (None,None)
 id_dfs = (id_df, None, None)
@@ -76,19 +74,25 @@ true_labels = cand_features.gold.values
 if np.sum(true_labels)==0:
     true_labels = None
 
-start_time = time.process_time()
-eval2 = time.perf_counter()
-y_pred, results_per_iteration = utils.run_zeroer(sim_features, sim_features_lr,id_dfs,
+start_time = time.perf_counter()
+y_pred, results_per_iteration, model = utils.run_zeroer(sim_features, sim_features_lr,id_dfs,
                     true_labels , LR_dup_free= True, LR_identical=False, run_trans=True)
-eval_time = time.process_time() - start_time
-eval2 = time.perf_counter() - eval2
-print(f"Evaluation done after {eval_time:.4f}s")
-print(f"evaluation time after perf_counter: {eval2:.4f}s")
+train_time = time.perf_counter() - start_time
+print(f"Evaluation done after {train_time:.4f}s")
+
+start_time = time.perf_counter()
+y_pred = model.predict_PM(sim_features.values)
+
+ids = id_df.values
+id_tuple_to_index = dict([])
+for i in range(ids.shape[0]):
+    id_tuple_to_index[(ids[i,0],ids[i,1])] = i
+    id_tuple_to_index[(ids[i,1], ids[i,0])] = i
+y_pred = model.enforce_transitivity(y_pred, ids, id_tuple_to_index, None, None, LR_dup_free=True, LR_identical=False)
+eval_time = time.perf_counter() - start_time
+
 
 pred_df = cand_features.copy()
 pred_df['pred'] = y_pred
 
-transform_output(pred_df, results_per_iteration, 0, eval_time, prep_time, args.output)
-
-#Evaluation done after 76.4864s
-#evaluation time after perf_counter: 9.9671s
+transform_output(pred_df, results_per_iteration, train_time, eval_time, prep_time, args.output)

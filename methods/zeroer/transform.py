@@ -53,8 +53,8 @@ def transform_output(predictions, results_per_iteration, train_time, eval_time, 
     predictions.csv: tableA_id, tableB_id, etc. (should have at least 2 columns and a header row)
     """
 
-    predictions['prob_class1'] = np.clip(predictions['pred']+utils.DEL, 0., 1.)
-    predictions['prediction'] = np.round(np.clip(predictions['pred'] + utils.DEL, 0., 1.)).astype(int)
+    predictions['prob_class1'] = predictions['pred'] #np.clip(predictions['pred']+utils.DEL, 0., 1.)
+    predictions['prediction'] = np.round(predictions['prob_class1']).astype(int)
     p_table = predictions[['ltable_id', 'rtable_id', 'gold', 'prob_class1']]
     p_table.columns = p_table.columns = ['tableA_id', 'tableB_id', 'label', 'prob_class1']
     candidate_table = predictions[predictions['prediction'] == 1]

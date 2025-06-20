@@ -1,6 +1,6 @@
 module.exports = {
   reactStrictMode: true,
   serverActions: {
-    bodySizeLimit: '5mb',
+    bodySizeLimit: '20mb',
   },
 }

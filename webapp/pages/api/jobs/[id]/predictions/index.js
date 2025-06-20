@@ -4,7 +4,7 @@ import {queryPredictions} from "./query";
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '5mb',
+      sizeLimit: '20mb',
     },
   },
 }

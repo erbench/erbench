@@ -247,7 +247,7 @@ def check_job(job: Job):
             print(f"Job {job['id']} failed")
     except Exception as e:
         erbench_client.update_job(job["id"], JobStatus.FAILED)
-        print(f"Error checking job status: {str(e)}")
+        print(f"Error updating status: {str(e)}")
 
 
 def run_job():

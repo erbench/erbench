@@ -1,6 +1,14 @@
 import prisma from "../../../../../prisma/client";
 import {queryPredictions} from "./query";
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '5mb',
+    },
+  },
+}
+
 export default async function handler(req, res) {
   const jobId = req.query.id;
 

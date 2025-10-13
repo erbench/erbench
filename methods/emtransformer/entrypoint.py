@@ -63,7 +63,7 @@ print("training with {} labels: {}".format(len(label_list), label_list))
 # Step 2. Run the method
 model_name = args.model.lower()
 max_seq_length = 128
-train_batch_size = 16
+train_batch_size = 32
 
 
 config_class, model_class, tokenizer_class = Config.MODEL_CLASSES[model_name]

@@ -53,29 +53,29 @@ export default function ViewJob({ job }) {
   });
 
   useEffect(() => {
-    loadLazyPredictions();
-  }, [predictionsState]);
+    const loadLazyPredictions = async () => {
+      setLoadingPredictions(true);
+      try {
+        const response = await fetch(`/api/jobs/${job.id}/predictions/query`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(predictionsState)
+        });
+        const results = await response.json();
+        setPredictions(results.data);
+        setTotalPredictions(results.page.total);
+      } catch (error) {
+        console.error("Failed to load predictions:", error);
+      } finally {
+        setLoadingPredictions(false);
+      }
+    };
 
-  const loadLazyPredictions = async () => {
-    setLoadingPredictions(true);
-    try {
-      const response = await fetch(`/api/jobs/${job.id}/predictions/query`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(predictionsState)
-      });
-      const results = await response.json();
-      setPredictions(results.data);
-      setTotalPredictions(results.page.total);
-    } catch (error) {
-      console.error("Failed to load predictions:", error);
-    } finally {
-      setLoadingPredictions(false);
-    }
-  };
+    loadLazyPredictions();
+  }, [predictionsState, job.id]);
 
   const setPredictionsStateAndResetPage = (e) => {
     e.first = 0;

@@ -1,18 +1,20 @@
 #!/bin/bash
 
-DESTINATION="./apptainer"
-METHODS=(
-    "./methods/deepmatcher"
-    "./methods/ditto"
-    "./methods/emtransformer"
-    "./methods/gnem"
-    "./methods/hiermatcher"
-    "./methods/magellan"
-    "./methods/zeroer"
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DESTINATION="$BASE_DIR/apptainer"
 
-    "./splitters/Random"
-    "./splitters/KNN-Join"
-    "./splitters/DeepBlocker"
+METHODS=(
+    "$BASE_DIR/methods/deepmatcher"
+    "$BASE_DIR/methods/ditto"
+    "$BASE_DIR/methods/emtransformer"
+    "$BASE_DIR/methods/gnem"
+    "$BASE_DIR/methods/hiermatcher"
+    "$BASE_DIR/methods/magellan"
+    "$BASE_DIR/methods/zeroer"
+
+    "$BASE_DIR/splitters/Random"
+    "$BASE_DIR/splitters/KNN-Join"
+    "$BASE_DIR/splitters/DeepBlocker"
 )
 
 COMMAND="apptainer build --force"

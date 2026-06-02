@@ -1,18 +1,18 @@
 #!/bin/bash
 
-DESTINATION="/home/astappiev/nocode-er-bench/apptainer"
+DESTINATION="./apptainer"
 METHODS=(
-    "/home/astappiev/nocode-er-bench/methods/deepmatcher"
-    "/home/astappiev/nocode-er-bench/methods/ditto"
-    "/home/astappiev/nocode-er-bench/methods/emtransformer"
-    "/home/astappiev/nocode-er-bench/methods/gnem"
-    "/home/astappiev/nocode-er-bench/methods/hiermatcher"
-    "/home/astappiev/nocode-er-bench/methods/magellan"
-    "/home/astappiev/nocode-er-bench/methods/zeroer"
+    "./methods/deepmatcher"
+    "./methods/ditto"
+    "./methods/emtransformer"
+    "./methods/gnem"
+    "./methods/hiermatcher"
+    "./methods/magellan"
+    "./methods/zeroer"
 
-    "/home/astappiev/nocode-er-bench/splitters/Random"
-    "/home/astappiev/nocode-er-bench/splitters/KNN-Join"
-    "/home/astappiev/nocode-er-bench/splitters/DeepBlocker"
+    "./splitters/Random"
+    "./splitters/KNN-Join"
+    "./splitters/DeepBlocker"
 )
 
 COMMAND="apptainer build --force"

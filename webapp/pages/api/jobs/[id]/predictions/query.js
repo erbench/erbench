@@ -33,6 +33,21 @@ export async function queryPredictions(jobId, params) {
       }
     }
 
+    if (params.filters.name?.value) {
+      if (params.filters.name.matchMode === 'contains') {
+        whereClause.name = {contains: params.filters.name.value};
+      } else {
+        whereClause.name = params.filters.name.value;
+      }
+    }
+
+    if (params.filters.label?.value !== undefined && params.filters.label?.value !== null && params.filters.label?.value !== "") {
+      const labelValue = parseInt(params.filters.label.value);
+      if (!isNaN(labelValue)) {
+        whereClause.label = labelValue;
+      }
+    }
+
     if (params.filters.probability?.value) {
       const probValue = parseFloat(params.filters.probability.value);
       if (!isNaN(probValue)) {

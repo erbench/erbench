@@ -1,5 +1,5 @@
 import prisma from "../../../../../prisma/client";
-import {queryPredictions} from "./query";
+import { queryPredictions } from "./query";
 
 export const config = {
   api: {
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
       return res.status(200).json(data);
     } catch (error) {
       console.error("Error fetching job predictions:", error);
-      return res.status(500).json({error: "Failed to fetch predictions"});
+      return res.status(500).json({ error: "Failed to fetch predictions" });
     }
   }
 
@@ -36,6 +36,8 @@ export default async function handler(req, res) {
         tableA_id: p.tableA_id,
         tableB_id: p.tableB_id,
         probability: p.probability,
+        name: p.name,
+        label: p.label,
       }));
 
       await prisma.predictions.createMany({
@@ -46,9 +48,9 @@ export default async function handler(req, res) {
       return res.status(200).end();
     } catch (error) {
       console.error("Error inserting predictions:", error);
-      return res.status(500).json({error: "Failed to save predictions"});
+      return res.status(500).json({ error: "Failed to save predictions" });
     }
   }
 
-  return res.status(405).json({error: 'Method not allowed'});
+  return res.status(405).json({ error: 'Method not allowed' });
 }

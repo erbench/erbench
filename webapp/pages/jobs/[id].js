@@ -1,16 +1,16 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 
 import prisma from "../../prisma/client";
-import {Panel} from "primereact/panel";
-import {DataTable} from "primereact/datatable";
-import {Column} from "primereact/column";
+import { Panel } from "primereact/panel";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
 import Head from 'next/head';
-import {hideEmail} from "../../utils/formattingUtils";
-import {Button} from "primereact/button";
-import {renderParams} from "../../utils/jobUtils";
+import { hideEmail } from "../../utils/formattingUtils";
+import { Button } from "primereact/button";
+import { renderParams } from "../../utils/jobUtils";
 
-export const getServerSideProps = async ({query}) => {
-  const {id} = query;
+export const getServerSideProps = async ({ query }) => {
+  const { id } = query;
 
   const job = await prisma.job.findFirst({
     where: {
@@ -33,7 +33,7 @@ export const getServerSideProps = async ({query}) => {
   }
 }
 
-export default function ViewJob({job}) {
+export default function ViewJob({ job }) {
   const [predictions, setPredictions] = useState(null);
   const [loadingPredictions, setLoadingPredictions] = useState(false);
   const [totalPredictions, setTotalPredictions] = useState(0);
@@ -44,9 +44,11 @@ export default function ViewJob({job}) {
     sortField: 'probability',
     sortOrder: 1,
     filters: {
-      tableA_id: {value: '', matchMode: 'equals'},
-      tableB_id: {value: '', matchMode: 'equals'},
-      probability: {value: '', matchMode: 'gte'},
+      tableA_id: { value: '', matchMode: 'equals' },
+      tableB_id: { value: '', matchMode: 'equals' },
+      name: { value: '', matchMode: 'contains' },
+      label: { value: '', matchMode: 'equals' },
+      probability: { value: '', matchMode: 'gte' },
     }
   });
 
@@ -81,14 +83,14 @@ export default function ViewJob({job}) {
   }
 
   const idFilterOptions = [
-    {label: 'Contains', value: 'contains'},
-    {label: 'Equals', value: 'equals'}
+    { label: 'Contains', value: 'contains' },
+    { label: 'Equals', value: 'equals' }
   ];
 
   const probabilityFilterOptions = [
-    {label: 'Greater than or equal to', value: 'gte'},
-    {label: 'Less than or equal to', value: 'lte'},
-    {label: 'Equals', value: 'equals'}
+    { label: 'Greater than or equal to', value: 'gte' },
+    { label: 'Less than or equal to', value: 'lte' },
+    { label: 'Equals', value: 'equals' }
   ];
 
   if (!job) {
@@ -101,17 +103,17 @@ export default function ViewJob({job}) {
     <div className="flex justify-content-between align-items-center">
       <div>Total predictions: {totalPredictions}</div>
       <Button type="button" size="small" icon="pi pi-file-export" rounded data-pr-tooltip="Export to CSV"
-              onClick={() => window.open(`/api/jobs/${job.id}/predictions/csv`, '_blank')}/>
+        onClick={() => window.open(`/api/jobs/${job.id}/predictions/csv`, '_blank')} />
     </div>
   );
 
   return <div>
     <Head>
       <title>Job: {job.id} | SMBench</title>
-      <meta name="description" content={`Job ${job.id} details, including status, parameters, and results.`}/>
+      <meta name="description" content={`Job ${job.id} details, including status, parameters, and results.`} />
     </Head>
 
-    <h1 className="text-4xl font-bold"><span style={{color: '#777', fontWeight: 'normal'}}>Job:</span> {job.id}</h1>
+    <h1 className="text-4xl font-bold"><span style={{ color: '#777', fontWeight: 'normal' }}>Job:</span> {job.id}</h1>
 
     <Panel header={"Status: " + job.status}>
       <div className="grid">
@@ -322,14 +324,16 @@ export default function ViewJob({job}) {
     {job.status === 'completed' && (
       <Panel header="Predictions" footer={predictionsFooter} className="mt-3 p-panel-no-padding">
         <DataTable value={predictions} lazy stripedRows size="small" emptyMessage={"No predictions returned"} loading={loadingPredictions}
-                   paginator first={predictionsState.first} rows={predictionsState.rows} totalRecords={totalPredictions}
-                   sortField={predictionsState.sortField} sortOrder={predictionsState.sortOrder}
-                   filters={predictionsState.filters} filterDisplay="row" filterDelay={500} onFilter={setPredictionsStateAndResetPage}
-                   onPage={setPredictionsState} onSort={setPredictionsState}>
-          <Column field="tableA_id" header="Table A (ID)" sortable filter filterPlaceholder="Filter results" filterMatchModeOptions={idFilterOptions}/>
-          <Column field="tableB_id" header="Table B (ID)" sortable filter filterPlaceholder="Filter results" filterMatchModeOptions={idFilterOptions}/>
+          paginator first={predictionsState.first} rows={predictionsState.rows} totalRecords={totalPredictions}
+          sortField={predictionsState.sortField} sortOrder={predictionsState.sortOrder}
+          filters={predictionsState.filters} filterDisplay="row" filterDelay={500} onFilter={setPredictionsStateAndResetPage}
+          onPage={setPredictionsState} onSort={setPredictionsState}>
+          <Column field="tableA_id" header="Table A (ID)" sortable filter filterPlaceholder="Filter results" filterMatchModeOptions={idFilterOptions} />
+          <Column field="tableB_id" header="Table B (ID)" sortable filter filterPlaceholder="Filter results" filterMatchModeOptions={idFilterOptions} />
+          <Column field="name" header="Name" sortable filter filterPlaceholder="Filter results" filterMatchModeOptions={idFilterOptions} />
+          <Column field="label" header="Label" sortable filter filterPlaceholder="Filter results" filterMatchModeOptions={idFilterOptions} />
           <Column field="probability" header="Probability" sortable filter filterPlaceholder="Filter results"
-                  filterMatchModeOptions={probabilityFilterOptions}/>
+            filterMatchModeOptions={probabilityFilterOptions} />
         </DataTable>
       </Panel>
     )}

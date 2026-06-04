@@ -22,8 +22,8 @@ def join_columns(table, columns_to_join=None, separator=' ', prefixes=['tableA_'
         part_table.rename(prefix + 'AgValue', inplace=True)
 
         agg_table = pd.concat([agg_table, table[prefix + 'id'], part_table], axis=1)
-
-    return pd.concat([agg_table, table['label']], axis=1)
+    name_cols = list(sorted([col for col in table.columns if col.endswith('_name') or col.endswith('_title')]))
+    return pd.concat([agg_table, table[['label'], name_cols]], axis=1)
 
 
 def transform_input(source_dir, columns_to_join=None, separator=' ', prefixes=['tableA_', 'tableB_']):
@@ -50,7 +50,12 @@ def transform_output(predictions_df, logits, test_table, results_per_epoch, trai
     predictions_df['prob_class1'] = probs[:, 1].tolist()
     predictions_df['tableA_id'] = test_table.loc[predictions_df.index, 'tableA_id']
     predictions_df['tableB_id'] = test_table.loc[predictions_df.index, 'tableB_id']
-    predictions_df[['tableA_id', 'tableB_id', 'label', 'prob_class1']].to_csv(os.path.join(dest_dir, 'predictions.csv'), index=False)
+
+    #get name/title columns:
+    name_cols = list(sorted([col for col in test_table.columns if col.endswith('_name') or col.endswith('_title')]))
+    predictions_df['tableA_name'] = test_table.loc[predictions_df.index, name_cols[0]]
+    predictions_df['tableB_name'] = test_table.loc[predictions_df.index, name_cols[1]]
+    predictions_df[['tableA_id', 'tableB_id', 'tableA_name', 'tableB_name', 'label', 'prob_class1']].to_csv(os.path.join(dest_dir, 'predictions.csv'), index=False)
     # get the actual candidates (entity pairs with prediction 1)
     #candidate_ids = predictions_df[predictions_df['predictions'] == 1]
     #candidate_table = test_table.iloc[candidate_ids.index]

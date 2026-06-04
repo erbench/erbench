@@ -16,6 +16,7 @@ From: python:3.11
 
 %post
     cd /srv
+    pip install --no-cache-dir "setuptools<58"
     pip install --no-cache-dir -r requirements.txt
 
 %runscript

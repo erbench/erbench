@@ -37,7 +37,18 @@ def is_embeddings_required(algoCode: str) -> bool:
 
 
 def render_params(params: dict) -> str:
-    return " ".join([f"--{k}" if v is True else f'--{k}="{v}"' if isinstance(v, str) and " " in v else f"--{k}={v}" for k, v in params.items() if v is not None])
+    result = []
+    for key, value in params.items():
+        if value is None or value is False:
+            continue
+        elif value is True:
+            result.append(f"--{key}")
+        elif isinstance(value, str) and " " in value:
+            result.append(f'--{key}="{value}"')
+        else:
+            result.append(f"--{key}={value}")
+
+    return " ".join(result)
 
 
 def import_filtering_job(job_id: str, input_dir: any, slurm_job_id: int = None):

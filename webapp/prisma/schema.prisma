@@ -115,6 +115,8 @@ model Predictions {
 
   tableA_id   BigInt
   tableB_id   BigInt
+  name  String?
+  label Int?
   probability Float?
 
   @@id([jobId, tableA_id, tableB_id])

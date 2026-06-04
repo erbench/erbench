@@ -1,18 +1,20 @@
 #!/bin/bash
 
-DESTINATION="/home/astappiev/nocode-er-bench/apptainer"
-METHODS=(
-    "/home/astappiev/nocode-er-bench/methods/deepmatcher"
-    "/home/astappiev/nocode-er-bench/methods/ditto"
-    "/home/astappiev/nocode-er-bench/methods/emtransformer"
-    "/home/astappiev/nocode-er-bench/methods/gnem"
-    "/home/astappiev/nocode-er-bench/methods/hiermatcher"
-    "/home/astappiev/nocode-er-bench/methods/magellan"
-    "/home/astappiev/nocode-er-bench/methods/zeroer"
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DESTINATION="$BASE_DIR/apptainer"
 
-    "/home/astappiev/nocode-er-bench/splitters/Random"
-    "/home/astappiev/nocode-er-bench/splitters/KNN-Join"
-    "/home/astappiev/nocode-er-bench/splitters/DeepBlocker"
+METHODS=(
+    "$BASE_DIR/methods/deepmatcher"
+    "$BASE_DIR/methods/ditto"
+    "$BASE_DIR/methods/emtransformer"
+    "$BASE_DIR/methods/gnem"
+    "$BASE_DIR/methods/hiermatcher"
+    "$BASE_DIR/methods/magellan"
+    "$BASE_DIR/methods/zeroer"
+
+    "$BASE_DIR/splitters/Random"
+    "$BASE_DIR/splitters/KNN-Join"
+    "$BASE_DIR/splitters/DeepBlocker"
 )
 
 COMMAND="apptainer build --force"

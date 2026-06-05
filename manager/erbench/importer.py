@@ -82,9 +82,10 @@ def import_predictions(directory: str) -> List[Prediction] | None:
                     {
                         "tableA_id": int(prediction_data.get("tableA_id")),
                         "tableB_id": int(prediction_data.get("tableB_id")),
-                        "name": prediction_data.get("name"),
-                        "label": int(prediction_data.get("label", 0)),
+                        "tableA_name": prediction_data.get("tableA_name"),
+                        "tableB_name": prediction_data.get("tableB_name"),
                         "probability": float(prediction_data.get("prob_class1", 0)),
+                        "label": int(prediction_data.get("label", 0)),
                     }
                 )
     except Exception as e:

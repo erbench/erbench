@@ -33,11 +33,19 @@ export async function queryPredictions(jobId, params) {
       }
     }
 
-    if (params.filters.name?.value) {
-      if (params.filters.name.matchMode === 'contains') {
-        whereClause.name = {contains: params.filters.name.value};
+    if (params.filters.tableA_name?.value) {
+      if (params.filters.tableA_name.matchMode === 'contains') {
+        whereClause.tableA_name = {contains: params.filters.tableA_name.value};
       } else {
-        whereClause.name = params.filters.name.value;
+        whereClause.tableA_name = params.filters.tableA_name.value;
+      }
+    }
+
+    if (params.filters.tableB_name?.value) {
+      if (params.filters.tableB_name.matchMode === 'contains') {
+        whereClause.tableB_name = {contains: params.filters.tableB_name.value};
+      } else {
+        whereClause.tableB_name = params.filters.tableB_name.value;
       }
     }
 

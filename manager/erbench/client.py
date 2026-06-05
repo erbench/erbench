@@ -84,6 +84,8 @@ class JobStatus(str, Enum):
 class Prediction(TypedDict):
     tableA_id: int
     tableB_id: int
+    tableA_name: Optional[str]
+    tableB_name: Optional[str]
     probability: float
     label: int
 

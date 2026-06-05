@@ -46,9 +46,10 @@ export default function ViewJob({ job }) {
     filters: {
       tableA_id: { value: '', matchMode: 'equals' },
       tableB_id: { value: '', matchMode: 'equals' },
-      name: { value: '', matchMode: 'contains' },
-      label: { value: '', matchMode: 'equals' },
+      tableA_name: { value: '', matchMode: 'contains' },
+      tableB_name: { value: '', matchMode: 'contains' },
       probability: { value: '', matchMode: 'gte' },
+      label: { value: '', matchMode: 'equals' },
     }
   });
 
@@ -330,10 +331,11 @@ export default function ViewJob({ job }) {
           onPage={setPredictionsState} onSort={setPredictionsState}>
           <Column field="tableA_id" header="Table A (ID)" sortable filter filterPlaceholder="Filter results" filterMatchModeOptions={idFilterOptions} />
           <Column field="tableB_id" header="Table B (ID)" sortable filter filterPlaceholder="Filter results" filterMatchModeOptions={idFilterOptions} />
-          <Column field="name" header="Name" sortable filter filterPlaceholder="Filter results" filterMatchModeOptions={idFilterOptions} />
-          <Column field="label" header="Label" sortable filter filterPlaceholder="Filter results" filterMatchModeOptions={idFilterOptions} />
+          <Column field="tableA_name" header="Table A (Name)" sortable filter filterPlaceholder="Filter results" filterMatchModeOptions={idFilterOptions} />
+          <Column field="tableB_name" header="Table B (Name)" sortable filter filterPlaceholder="Filter results" filterMatchModeOptions={idFilterOptions} />
           <Column field="probability" header="Probability" sortable filter filterPlaceholder="Filter results"
             filterMatchModeOptions={probabilityFilterOptions} />
+          <Column field="label" header="Label" sortable filter filterPlaceholder="Filter results" filterMatchModeOptions={idFilterOptions} />
         </DataTable>
       </Panel>
     )}

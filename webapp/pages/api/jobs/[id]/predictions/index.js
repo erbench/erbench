@@ -35,8 +35,9 @@ export default async function handler(req, res) {
         jobId: jobId,
         tableA_id: p.tableA_id,
         tableB_id: p.tableB_id,
+        tableA_name: p.tableA_name,
+        tableB_name: p.tableB_name,
         probability: p.probability,
-        name: p.name,
         label: p.label,
       }));
 

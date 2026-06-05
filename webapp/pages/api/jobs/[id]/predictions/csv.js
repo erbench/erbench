@@ -53,7 +53,7 @@ function generatePredictionsCsv(job) {
   csv += `# Total Predictions: ${job.predictions.length}\n\n`;
 
   // Add data
-  csv += 'tableA_id,tableB_id,name,label,probability\n';
-  csv += job.predictions.map(p => `${p.tableA_id},${p.tableB_id},"${p.name || ''}",${p.label !== null ? p.label : ''},${p.probability}`).join('\n');
+  csv += 'tableA_id,tableB_id,tableA_name,tableB_name,probability,label\n';
+  csv += job.predictions.map(p => `${p.tableA_id},${p.tableB_id},"${p.tableA_name || ''}","${p.tableB_name || ''}",${p.probability},${p.label !== null ? p.label : ''}`).join('\n');
   return csv;
 }

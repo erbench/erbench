@@ -1,18 +1,18 @@
-import React, {useState} from 'react';
-import {useRouter} from 'next/navigation';
-import {DataTable} from 'primereact/datatable';
-import {Column} from 'primereact/column';
-import {Button} from 'primereact/button';
-import {InputNumber} from 'primereact/inputnumber';
-import {Dropdown} from 'primereact/dropdown';
-import {InputText} from "primereact/inputtext";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { Button } from 'primereact/button';
+import { InputNumber } from 'primereact/inputnumber';
+import { Dropdown } from 'primereact/dropdown';
+import { InputText } from "primereact/inputtext";
 
 import prisma from "../prisma/client";
-import {Checkbox} from "primereact/checkbox";
-import {renderDate, renderParams} from "../utils/jobUtils";
+import { Checkbox } from "primereact/checkbox";
+import { renderDate, renderParams } from "../utils/jobUtils";
 import Head from "next/head";
 
-export const getServerSideProps = async ({req}) => {
+export const getServerSideProps = async ({ req }) => {
   const algorithms = await prisma.algorithm.findMany({ orderBy: { id: 'asc' } });
   const datasets = await prisma.dataset.findMany({ orderBy: { name: 'asc' } });
 
@@ -24,7 +24,7 @@ export const getServerSideProps = async ({req}) => {
   }
 }
 
-export default function Home({datasets, algorithms}) {
+export default function Home({ datasets, algorithms }) {
   const router = useRouter();
 
   // fields
@@ -50,6 +50,29 @@ export default function Home({datasets, algorithms}) {
   // data
   const [results, setResults] = useState([]);
   const [forceSubmit, setForceSubmit] = useState(false);
+
+  useEffect(() => {
+    if (selectedMatchingAlgo && selectedMatchingAlgo.params) {
+      if ('model' in selectedMatchingAlgo.params && typeof selectedMatchingAlgo.params.model === 'string' && selectedMatchingAlgo.params.model.startsWith('dropdown')) {
+        setMatchingModel(selectedMatchingAlgo.params.model.split('=')[1].split('|')[0]);
+      } else {
+        setMatchingModel(null);
+      }
+      if ('method' in selectedMatchingAlgo.params && typeof selectedMatchingAlgo.params.method === 'string' && selectedMatchingAlgo.params.method.startsWith('dropdown')) {
+        setMatchingMethod(selectedMatchingAlgo.params.method.split('=')[1].split('|')[0]);
+      } else {
+        setMatchingMethod(null);
+      }
+    }
+  }, [selectedMatchingAlgo]);
+
+  useEffect(() => {
+    if (selectedFilteringAlgo && selectedFilteringAlgo.params) {
+      if ('recall' in selectedFilteringAlgo.params && typeof selectedFilteringAlgo.params.recall === 'string' && selectedFilteringAlgo.params.recall.startsWith('dropdown')) {
+        setFilteringRecall(parseFloat(selectedFilteringAlgo.params.recall.split('=')[1].split('|')[0]));
+      }
+    }
+  }, [selectedFilteringAlgo]);
 
   const onSubmit = async (e) => {
     setResults([]);
@@ -89,11 +112,11 @@ export default function Home({datasets, algorithms}) {
         },
         body: JSON.stringify({
           filters: {
-            datasetId: {value: selectedDataset.id, matchMode: 'equals'},
-            filteringAlgoId: {value: selectedFilteringAlgo.id, matchMode: 'equals'},
-            filteringParams: {value: filteringParams, matchMode: 'equals'},
-            matchingAlgoId: {value: selectedMatchingAlgo.id, matchMode: 'equals'},
-            matchingParams: {value: matchingParams, matchMode: 'equals'},
+            datasetId: { value: selectedDataset.id, matchMode: 'equals' },
+            filteringAlgoId: { value: selectedFilteringAlgo.id, matchMode: 'equals' },
+            filteringParams: { value: filteringParams, matchMode: 'equals' },
+            matchingAlgoId: { value: selectedMatchingAlgo.id, matchMode: 'equals' },
+            matchingParams: { value: matchingParams, matchMode: 'equals' },
           },
         }),
       });
@@ -131,7 +154,7 @@ export default function Home({datasets, algorithms}) {
   return <div>
     <Head>
       <title>Submit a new job | SMBench</title>
-      <meta name="description" content="On this page you can submit a new job for entity resolution benchmarking"/>
+      <meta name="description" content="On this page you can submit a new job for entity resolution benchmarking" />
     </Head>
 
     <h1 className="text-4xl font-bold">SMBench: No-code Benchmarking of Learning-based Entity Matching</h1>
@@ -141,21 +164,21 @@ export default function Home({datasets, algorithms}) {
         <div className="flex flex-column gap-2 mb-3">
           <label htmlFor="dataset">Dataset</label>
           <Dropdown id="dataset" aria-describedby="dataset-help" className="w-full"
-                    value={selectedDataset} onChange={(e) => setSelectedDataset(e.value)}
-                    disabled={formDisabled}
-                    options={datasets} optionLabel="name"
-                    placeholder="Select a dataset"/>
+            value={selectedDataset} onChange={(e) => setSelectedDataset(e.value)}
+            disabled={formDisabled}
+            options={datasets} optionLabel="name"
+            placeholder="Select a dataset" />
           <small id="dataset-help">Select one of nine datasets that are popular in the literature</small>
         </div>
 
         <div className="flex flex-column gap-2 mb-3">
           <label htmlFor="filtering-algorithm">Filtering Algorithm</label>
           <Dropdown id="filtering-algorithm" aria-describedby="filtering-algorithm-help" className="w-full"
-                    value={selectedFilteringAlgo} onChange={(e) => setSelectedFilteringAlgo(e.value)}
-                    disabled={formDisabled}
-                    options={algorithms.filter(algo => algo.scenarios.includes('filtering'))}
-                    optionLabel="name"
-                    placeholder="Select an algorithm"/>
+            value={selectedFilteringAlgo} onChange={(e) => setSelectedFilteringAlgo(e.value)}
+            disabled={formDisabled}
+            options={algorithms.filter(algo => algo.scenarios.includes('filtering'))}
+            optionLabel="name"
+            placeholder="Select an algorithm" />
           <small id="filtering-algorithm-help">Which Filtering method to use for generating the candidate pairs</small>
         </div>
 
@@ -164,17 +187,17 @@ export default function Home({datasets, algorithms}) {
             <label htmlFor="filtering-recall">Filtering Recall</label>
             {selectedFilteringAlgo.params.recall === 'number' && (
               <InputNumber id="filtering-recall" aria-describedby="filtering-recall-help" className="w-full"
-                           value={filteringRecall} onValueChange={(e) => setFilteringRecall(e.value)}
-                           disabled={formDisabled}
-                           minFractionDigits={2} min={0} max={1} step={0.05} mode="decimal"
-                           showButtons/>
+                value={filteringRecall} onValueChange={(e) => setFilteringRecall(e.value)}
+                disabled={formDisabled}
+                minFractionDigits={2} min={0} max={1} step={0.05} mode="decimal"
+                showButtons />
             )}
             {selectedFilteringAlgo.params.recall.startsWith('dropdown') && (
               <Dropdown id="filtering-recall" aria-describedby="filtering-recall-help" className="w-full"
-                        value={filteringRecall} onChange={(e) => setFilteringRecall(e.value)}
-                        disabled={formDisabled}
-                        options={selectedFilteringAlgo.params.recall.split('=')[1].split('|').map(v => parseFloat(v))}
-                        placeholder="Select an algorithm"/>
+                value={filteringRecall} onChange={(e) => setFilteringRecall(e.value)}
+                disabled={formDisabled}
+                options={selectedFilteringAlgo.params.recall.split('=')[1].split('|').map(v => parseFloat(v))}
+                placeholder="Select an algorithm" />
             )}
             <small id="filtering-recall-help">The minimum acceptable recall, against which we maximize precision</small>
           </div>
@@ -184,10 +207,10 @@ export default function Home({datasets, algorithms}) {
           <div className="flex flex-column gap-2 mb-3">
             <label htmlFor="filtering-negpairs">Negative Pairs Ratio</label>
             <InputNumber id="filtering-negpairs" aria-describedby="filtering-negpairs-help" className="w-full"
-                         value={filteringNegPairsRatio} onValueChange={(e) => setFilteringNegPairsRatio(e.value)}
-                         disabled={formDisabled}
-                         minFractionDigits={1} min={0} max={50} step={0.1} mode="decimal"
-                         showButtons/>
+              value={filteringNegPairsRatio} onValueChange={(e) => setFilteringNegPairsRatio(e.value)}
+              disabled={formDisabled}
+              minFractionDigits={1} min={0} max={50} step={0.1} mode="decimal"
+              showButtons />
             <small id="filtering-negpairs-help">The number of negative instances per positive one in the candidate pairs generated by Random Splitter</small>
           </div>
         )}
@@ -196,8 +219,8 @@ export default function Home({datasets, algorithms}) {
           <div className="flex flex-column gap-2 mb-3">
             <label htmlFor="filtering-default">Default settings</label>
             <Checkbox id="filtering-default" aria-describedby="filtering-default-help" className="w-full"
-                      checked={filteringDefault} onChange={e => setFilteringDefault(e.checked)}
-                      disabled={formDisabled}/>
+              checked={filteringDefault} onChange={e => setFilteringDefault(e.checked)}
+              disabled={formDisabled} />
             <small id="filtering-default-help">Whether to use default settings or fine-tuned for the dataset</small>
           </div>
         )}
@@ -225,11 +248,11 @@ export default function Home({datasets, algorithms}) {
         <div className="flex flex-column gap-2 mb-3">
           <label htmlFor="matching-algorithm">Matching Algorithm</label>
           <Dropdown id="matching-algorithm" aria-describedby="matching-algorithm-help" className="w-full"
-                    value={selectedMatchingAlgo} onChange={(e) => setSelectedMatchingAlgo(e.value)}
-                    disabled={formDisabled}
-                    options={algorithms.filter(algo => algo.scenarios.includes('matching'))}
-                    optionLabel="name"
-                    placeholder="Select a model"/>
+            value={selectedMatchingAlgo} onChange={(e) => setSelectedMatchingAlgo(e.value)}
+            disabled={formDisabled}
+            options={algorithms.filter(algo => algo.scenarios.includes('matching'))}
+            optionLabel="name"
+            placeholder="Select a model" />
           <small id="matching-algorithm-help">Which Verification method to apply to the candidate pairs</small>
         </div>
 
@@ -237,9 +260,9 @@ export default function Home({datasets, algorithms}) {
           <div className="flex flex-column gap-2 mb-3">
             <label htmlFor="matching-epochs">Matching Epochs</label>
             <InputNumber id="matching-epochs" aria-describedby="matching-epochs-help" className="w-full"
-                         value={matchingEpochs} onValueChange={(e) => setMatchingEpochs(e.value)}
-                         disabled={formDisabled}
-                         minFractionDigits={0} min={5} max={50} step={5} showButtons/>
+              value={matchingEpochs} onValueChange={(e) => setMatchingEpochs(e.value)}
+              disabled={formDisabled}
+              minFractionDigits={0} min={5} max={50} step={5} showButtons />
             <small id="matching-epochs-help">A numbers of epochs to run</small>
           </div>
         )}
@@ -249,10 +272,10 @@ export default function Home({datasets, algorithms}) {
             <label htmlFor="matching-model">Language Model</label>
             {selectedMatchingAlgo.params.model.startsWith('dropdown') && (
               <Dropdown id="matching-model" aria-describedby="matching-model-help" className="w-full"
-                        value={matchingModel} onChange={(e) => setMatchingModel(e.value)}
-                        disabled={formDisabled}
-                        options={selectedMatchingAlgo.params.model.split('=')[1].split('|')}
-                        placeholder="Select an algorithm"/>
+                value={matchingModel} onChange={(e) => setMatchingModel(e.value)}
+                disabled={formDisabled}
+                options={selectedMatchingAlgo.params.model.split('=')[1].split('|')}
+                placeholder="Select an algorithm" />
             )}
             <small id="matching-model-help">The language model generating the embedding vectors</small>
           </div>
@@ -263,10 +286,10 @@ export default function Home({datasets, algorithms}) {
             <label htmlFor="matching-method">Matching Method</label>
             {selectedMatchingAlgo.params.method.startsWith('dropdown') && (
               <Dropdown id="matching-method" aria-describedby="matching-method-help" className="w-full"
-                        value={matchingMethod} onChange={(e) => setMatchingMethod(e.value)}
-                        disabled={formDisabled}
-                        options={selectedMatchingAlgo.params.method.split('=')[1].split('|')}
-                        placeholder="Select an algorithm"/>
+                value={matchingMethod} onChange={(e) => setMatchingMethod(e.value)}
+                disabled={formDisabled}
+                options={selectedMatchingAlgo.params.method.split('=')[1].split('|')}
+                placeholder="Select an algorithm" />
             )}
             <small id="matching-method-help">A method value for matching</small>
           </div>
@@ -276,8 +299,8 @@ export default function Home({datasets, algorithms}) {
           <div className="flex flex-column gap-2 mb-3">
             <label htmlFor="matching-full">Use full dataset</label>
             <Checkbox id="matching-full" aria-describedby="matching-full-help" className="w-full"
-                      checked={matchingFull} onChange={e => setMatchingFull(e.checked)}
-                      disabled={formDisabled}/>
+              checked={matchingFull} onChange={e => setMatchingFull(e.checked)}
+              disabled={formDisabled} />
             <small id="matching-full-help">Whether to use full dataset or just the test part</small>
           </div>
         )}
@@ -289,8 +312,8 @@ export default function Home({datasets, algorithms}) {
         <div className="flex flex-column gap-2 mb-3">
           <label htmlFor="email">Email</label>
           <InputText id="email" aria-describedby="email-help" className="w-full"
-                     value={email} onChange={(e) => setEmail(e.target.value)}
-                     disabled={formDisabled}/>
+            value={email} onChange={(e) => setEmail(e.target.value)}
+            disabled={formDisabled} />
           <small id="email-help">We will notify when training is complete, it may take some time</small>
         </div>
       </div>
@@ -298,11 +321,11 @@ export default function Home({datasets, algorithms}) {
 
     <div className="grid">
       <div className="col-auto">
-        <Button label="Submit" onClick={onSubmit} disabled={results.length > 0 && !forceSubmit}/>
+        <Button label="Submit" onClick={onSubmit} disabled={results.length > 0 && !forceSubmit} />
       </div>
       {results.length > 0 && (
         <div className="col">
-          <Checkbox inputId="force" onChange={e => setForceSubmit(e.checked)} checked={forceSubmit}/>
+          <Checkbox inputId="force" onChange={e => setForceSubmit(e.checked)} checked={forceSubmit} />
           <label htmlFor="force" className="p-checkbox-label pl-2">I want to submit a new job</label>
         </div>
       )}

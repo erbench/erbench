@@ -19,6 +19,7 @@ CONTAINERS_DIR = os.getenv("CONTAINERS_DIR", "../apptainer")
 EMBEDDINGS_DIR = os.getenv("EMBEDDINGS_DIR", "../embeddings")
 TEMP_DIR = os.getenv("TEMP_DIR", "../running_jobs")
 SLURM_JOB_ARGS = os.getenv("SLURM_JOB_ARGS", "")
+HF_HOME = os.getenv("HF_HOME")
 
 # loads configuration from .env file
 erbench_client = ErbenchClient()
@@ -158,6 +159,10 @@ def start_job(job: Job):
             "error": os.path.join(job_dir, "filtering.err"),
             "wrap": f"apptainer run {filtering_container} {dataset_path} {job_dir} {filtering_params_str}",
         }
+
+        if HF_HOME:
+            filtering_slurm_params["export"] = f"ALL,TRANSFORMERS_CACHE={HF_HOME},HF_HOME={HF_HOME}"
+
         filtering_cmd = f"sbatch {SLURM_JOB_ARGS} {render_params(filtering_slurm_params)}"
         print(f"Filtering command: {filtering_cmd}")
 
@@ -183,6 +188,10 @@ def start_job(job: Job):
             "dependency": f"afterok:{filtering_job_id}",
             "wrap": f"apptainer run {matching_container} {job_dir} {matching_params_str}",
         }
+
+        if HF_HOME:
+            matching_slurm_params["export"] = f"ALL,TRANSFORMERS_CACHE={HF_HOME},HF_HOME={HF_HOME}"
+
         matching_cmd = f"sbatch {SLURM_JOB_ARGS} {render_params(matching_slurm_params)}"
         print(f"Matching command: {matching_cmd}")
 

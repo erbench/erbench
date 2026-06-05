@@ -48,7 +48,12 @@ def transform_output(predictions, data, stats, results_per_epoch, train_time, ev
     predictions['tableB_id'] = data.loc[predictions['id'], 'tableB_id']
     predictions['label'] = data.loc[predictions['id'], 'label']
 
-    predictions.loc[:, ['tableA_id', 'tableB_id', 'label', 'prob_class1']].to_csv(
+    # get name/title columns:
+    name_cols = list(sorted([col for col in data.columns if col.endswith('_name') or col.endswith('_title')]))
+    predictions['tableA_name'] = data.loc[predictions['id'], name_cols[0]]
+    predictions['tableB_name'] = data.loc[predictions['id'], name_cols[1]]
+
+    predictions.loc[:, ['tableA_id', 'tableB_id', 'tableA_name', 'tableB_name', 'label', 'prob_class1']].to_csv(
         os.path.join(dest_dir, 'predictions.csv'), index=False)
 
     pd.DataFrame({

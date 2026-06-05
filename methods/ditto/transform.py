@@ -27,9 +27,9 @@ def join_columns (table, columns_to_join=None, separator=' ', prefixes=['tableA_
         part_table.rename(prefix+'AgValue', inplace=True)
         
         agg_table = pd.concat([agg_table,part_table], axis=1)
-    
+    name_cols = list(sorted([col for col in table.columns if col.endswith('_name') or col.endswith('_title')]))
     return pd.concat([agg_table, table['label']], axis=1),\
-        pd.concat([table[prefixes[0] + 'id'], table[prefixes[1] + 'id']], axis=1)
+        table[[prefixes[0] + 'id', prefixes[1] + 'id']+name_cols]
 
 
 def transform_input(source_dir, output_dir, columns_to_join=None, separator=' ', prefixes=['tableA_', 'tableB_']):
@@ -58,8 +58,11 @@ def transform_output(scores, threshold, results_per_epoch, ids, labels, train_ti
     predictions.csv: tableA_id, tableB_id, etc. (should have at least 2 columns and a header row)
     """
 
+    name_cols = list(sorted([col for col in ids.columns if col.endswith('_name') or col.endswith('_title')]))
     # get the actual candidates (entity pairs with prediction 1)
-    predictions_df = pd.DataFrame({'tableA_id':ids['tableA_id'], 'tableB_id':ids['tableB_id'], 'label':labels, 'prob_class1':scores[:,1]})
+    predictions_df = pd.DataFrame({'tableA_id':ids['tableA_id'], 'tableB_id':ids['tableB_id'],
+                                   'tableA_name':ids[name_cols[0]], 'tableB_name':ids[name_cols[1]],
+                                   'label':labels, 'prob_class1':scores[:,1]})
 
     # save candidate pair IDs to predictions.csv
     predictions_df.to_csv(os.path.join(dest_dir, 'predictions.csv'), index=False)

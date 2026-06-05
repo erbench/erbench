@@ -57,16 +57,16 @@ train_table = pd.read_csv(os.path.join(args.input, 'train.csv'), encoding_errors
 val_table = pd.read_csv(os.path.join(args.input, 'valid.csv'), encoding_errors='replace')
 test_table = pd.read_csv(os.path.join(args.input, 'test.csv'), encoding_errors='replace')
 
-train_table = train_table.loc[:,['tableA_id', 'tableB_id', 'label']]
-print(train_table)
-train_table.columns = ['ltable_id', 'rtable_id', 'label']
-val_table = val_table.loc[:,['tableA_id', 'tableB_id', 'label']]
-val_table.columns = ['ltable_id', 'rtable_id', 'label']
-test_table = test_table.loc[:,['tableA_id', 'tableB_id', 'label']]
-test_table.columns = ['ltable_id', 'rtable_id', 'label']
-train_table.to_csv(os.path.join(args.output, 'train.csv'), index=False)
-val_table.to_csv(os.path.join(args.output, 'valid.csv'), index=False)
-test_table.to_csv(os.path.join(args.output, 'test.csv'), index=False)
+red_train_table = train_table.loc[:,['tableA_id', 'tableB_id', 'label']]
+print(red_train_table)
+red_train_table.columns = ['ltable_id', 'rtable_id', 'label']
+red_val_table = val_table.loc[:,['tableA_id', 'tableB_id', 'label']]
+red_val_table.columns = ['ltable_id', 'rtable_id', 'label']
+red_test_table = test_table.loc[:,['tableA_id', 'tableB_id', 'label']]
+red_test_table.columns = ['ltable_id', 'rtable_id', 'label']
+red_train_table.to_csv(os.path.join(args.output, 'train.csv'), index=False)
+red_val_table.to_csv(os.path.join(args.output, 'valid.csv'), index=False)
+red_test_table.to_csv(os.path.join(args.output, 'test.csv'), index=False)
 
 tableA = pd.read_csv(os.path.join(args.input, 'tableA.csv'), encoding_errors='replace')
 str_cols = [col for col in tableA.columns if col != 'id']
@@ -141,5 +141,5 @@ f1s, ps, rs, score_dicts, time_m, res_per_epoch = train(train_iter, args.output,
 eval_time = time.process_time() - time_m
 train_time =  time_m - start_time
 
-transform_output(score_dicts, f1s, ps, rs, train_time, eval_time, res_per_epoch, args.output)
+transform_output(score_dicts, f1s, ps, rs, train_time, eval_time, res_per_epoch, args.output, test_table)
 print("Final output: ", os.listdir(args.output))

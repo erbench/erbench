@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 
-def transform_output(score_dicts, f1s, ps, rs, train_time, eval_time, results_per_epoch, dest_dir):
+def transform_output(score_dicts, f1s, ps, rs, train_time, eval_time, results_per_epoch, dest_dir, test_table):
 
     # save predictions in predictions.csv
     l_id = []
@@ -16,9 +16,17 @@ def transform_output(score_dicts, f1s, ps, rs, train_time, eval_time, results_pe
             probs.append(score_dict[pair][0]) # see test_GNEM calculate_f1
             labels.append(score_dict[pair][1])
 
+    name_cols = list(sorted([col for col in test_table.columns if col.endswith('_name') or col.endswith('_title')]))
     predictions = pd.DataFrame(data={'tableA_id': l_id, 'tableB_id': r_id, 'label':labels, 'prob_class1':probs})
     predictions = predictions.drop_duplicates()
-    predictions.to_csv(os.path.join(dest_dir, 'predictions.csv'), index=False)
+    predictions.set_index(['tableA_id', 'tableB_id'], inplace=True)
+    test_table.set_index(['tableA_id', 'tableB_id'], inplace=True)
+    predictions['tableA_name'] = test_table.loc[predictions.index, name_cols[0]]
+    predictions['tableB_name'] = test_table.loc[predictions.index, name_cols[1]]
+    predictions.reset_index(inplace=True)
+    predictions.loc[:, ['tableA_id', 'tableB_id',
+                    'tableA_name', 'tableB_name',
+                    'label', 'prob_class1']].to_csv(os.path.join(dest_dir, 'predictions.csv'), index=False)
 
     # save evaluation metrics to metrics.csv
     pd.DataFrame({

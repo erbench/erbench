@@ -36,6 +36,7 @@ print("Input directory: ", os.listdir(args.input))
 print("Output directory: ", os.listdir(args.output))
 
 excl_attributes = ['tableA_id', 'tableB_id', 'label', 'id']
+
 def add_catalog_information(df, tableA, tableB):
     em.set_ltable(df, tableA)
     em.set_rtable(df, tableB)
@@ -55,6 +56,9 @@ tableA.rename(columns=lambda x: x.split('/')[-1], inplace=True)
 tableB.rename(columns=lambda x: x.split('/')[-1], inplace=True)
 train.rename(columns=lambda x: x.split('/')[-1], inplace=True)
 test.rename(columns=lambda x: x.split('/')[-1], inplace=True)
+
+name_cols = list(sorted([col for col in test.columns if col.endswith('_name') or col.endswith('_title')]))
+excl_attributes += name_cols
 
 train['id'] = np.arange(train.shape[0])
 test['id'] = np.arange(test.shape[0])
@@ -91,8 +95,8 @@ for num, feature in enumerate(F.feature_name):
 F = F[num:]
 
 # get feature vectors for the train and test set
-train_f_vectors = em.extract_feature_vecs(train, feature_table=F, attrs_after='label')
-test_f_vectors = em.extract_feature_vecs(test, feature_table=F, attrs_after='label')
+train_f_vectors = em.extract_feature_vecs(train, feature_table=F, attrs_after=excl_attributes)
+test_f_vectors = em.extract_feature_vecs(test, feature_table=F, attrs_after=excl_attributes)
 
 # remove NaN values from the feature vectors by replacing them with the mean
 if not pd.notnull(train_f_vectors).to_numpy().all():

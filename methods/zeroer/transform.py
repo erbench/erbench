@@ -46,7 +46,7 @@ def transform_input(source_dir, prefixes=['tableA_', 'tableB_'], use_full=True):
     return test_df, tableA_df, tableB_df, matches_df
 
 
-def transform_output(predictions, results_per_iteration, train_time, eval_time, preprocess_time, dest_dir):
+def transform_output(predictions, results_per_iteration, train_time, eval_time, preprocess_time, dest_dir, dataset):
     """
     Transform the output of the method into two common format files, which are stored in the destination directory.
     metrics.csv: f1, precision, recall, train_time, eval_time (1 row, 5 columns, with header)
@@ -54,12 +54,24 @@ def transform_output(predictions, results_per_iteration, train_time, eval_time, 
     """
 
     predictions['prob_class1'] = predictions['pred'] #np.clip(predictions['pred']+utils.DEL, 0., 1.)
-    predictions['prediction'] = np.round(predictions['prob_class1']).astype(int)
+    predictions['prediction'] = (predictions['prob_class1']>0.5).astype(int)
     p_table = predictions[['ltable_id', 'rtable_id', 'gold', 'prob_class1']]
-    p_table.columns = p_table.columns = ['tableA_id', 'tableB_id', 'label', 'prob_class1']
+    p_table.columns = ['tableA_id', 'tableB_id', 'label', 'prob_class1']
+
+    dataset.rename(columns=lambda x: x.replace('ltable', 'tableA').replace('rtable', 'tableB'), inplace=True)
+    name_cols = list(sorted([col for col in dataset.columns if col.endswith('_name') or col.endswith('_title')]))
+    p_table.set_index(['tableA_id', 'tableB_id'], inplace=True)
+
+    dataset.set_index(['tableA_id', 'tableB_id'], inplace=True)
+    p_table['tableA_name'] = dataset.loc[p_table.index, name_cols[0]]
+    p_table['tableB_name'] = dataset.loc[p_table.index, name_cols[1]]
+    p_table.reset_index(inplace=True)
+
     candidate_table = predictions[predictions['prediction'] == 1]
     # save candidate pair IDs to predictions.csv
-    p_table.to_csv(os.path.join(dest_dir, 'predictions.csv'), index=False)
+    p_table.loc[:, ['tableA_id', 'tableB_id',
+                    'tableA_name', 'tableB_name',
+                    'label', 'prob_class1']].to_csv(os.path.join(dest_dir, 'predictions.csv'), index=False)
 
     # calculate evaluation metrics
     num_candidates = candidate_table.shape[0]

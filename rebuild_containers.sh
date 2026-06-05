@@ -1,5 +1,7 @@
 #!/bin/bash
 
+unset APPTAINER_HOME
+
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DESTINATION="$BASE_DIR/apptainer"
 

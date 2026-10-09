@@ -13,7 +13,6 @@ from tuple_embedding_models import AutoEncoderTupleEmbedding
 from vector_pairing_models import ExactTopKVectorPairing
 from sklearn.model_selection import train_test_split
 
-import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import SnowballStemmer
@@ -21,11 +20,7 @@ from settings import dataset_settings
 
 
 def clean_entry(entry, stemmer, stop_words):
-    try:
-        list_entries = word_tokenize(entry)
-    except LookupError:
-        nltk.download('punkt_tab')
-        list_entries = word_tokenize(entry)
+    list_entries = word_tokenize(entry)
     clean_entries = [stemmer.stem(e) for e in list_entries if e not in stop_words]
     return ' '.join(clean_entries)
 
@@ -48,11 +43,7 @@ def generate_candidates(embedding_path, tableA_df, tableB_df, matches_df, settin
     block_B = tableB_df.copy()
 
     if settings['clean']:
-        try:
-            stop_words = set(stopwords.words('english'))
-        except LookupError:
-            nltk.download('stopwords')
-            stop_words = set(stopwords.words('english'))
+        stop_words = set(stopwords.words('english'))
         snowball_stemmer = SnowballStemmer('english')
         block_A[cols_to_block] = block_A[cols_to_block].map(lambda x: clean_entry(x, snowball_stemmer, stop_words))
         block_B[cols_to_block] = block_B[cols_to_block].map(lambda x: clean_entry(x, snowball_stemmer, stop_words))

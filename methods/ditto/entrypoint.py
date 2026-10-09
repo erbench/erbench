@@ -5,7 +5,6 @@ import os
 import pathtype
 import argparse
 import random
-import sys
 import torch
 import numpy as np
 from collections import namedtuple
@@ -13,13 +12,11 @@ import time
 
 from transform import transform_input, transform_output
 
-sys.path.insert(0, "Snippext_public")
-
 from ditto_light.dataset import DittoDataset
 from ditto_light.summarize import Summarizer
 from ditto_light.knowledge import ProductDKInjector, GeneralDKInjector
 from ditto_light.ditto import train
-from matcher import classify, tune_threshold
+from matcher import classify
 
 from scipy.special import softmax
 

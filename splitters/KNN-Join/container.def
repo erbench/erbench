@@ -17,8 +17,7 @@ From: python:3.9
 %post
     cd /srv
     pip install --no-cache-dir -r requirements.txt
-    python -m nltk.downloader stopwords
-    python -m nltk.downloader punkt_tab
+    python -m nltk.downloader -d /usr/local/share/nltk_data stopwords punkt_tab
 
 
 %runscript

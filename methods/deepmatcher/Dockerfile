@@ -7,6 +7,7 @@ RUN apt-get update --allow-insecure-repositories && \
 WORKDIR /workspace
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m nltk.downloader -d /usr/local/share/nltk_data perluniprops nonbreaking_prefixes punkt
 
 # Download the pre-trained model on English Wikipedia
 # ADD https://zenodo.org/record/6466387/files/wiki.en.bin /workspace/embeddings/wiki.en.bin

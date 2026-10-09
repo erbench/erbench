@@ -4,7 +4,9 @@ WORKDIR /workspace
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY *.py .
+COPY fork-emtransformer/src .
+COPY entrypoint.py .
+COPY transform.py .
 
 # This allows to run the container as `docker run --rm <yourImageName> <args>`
 ENTRYPOINT ["python", "-u", "./entrypoint.py"]

@@ -31,7 +31,7 @@ huggingface-cli login --token $HF_TOKEN
 
 ```bash
 mkdir -p ../../apptainer ../../output/emtransformer
-apptainer build ../../apptainer/emtransformer.sif container.def
+APPTAINER_HOME="" apptainer build ../../apptainer/emtransformer.sif container.def
 srun -p ampere --gpus=1 apptainer run ../../apptainer/emtransformer.sif ../../datasets/d2_abt_buy/ ../../output/emtransformer/
 
 # dev mode with bind

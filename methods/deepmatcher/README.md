@@ -25,7 +25,7 @@ docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/outpu
 
 ```bash
 mkdir -p ../../apptainer ../../output/deepmatcher
-apptainer build ../../apptainer/deepmatcher.sif container.def
+APPTAINER_HOME="" apptainer build ../../apptainer/deepmatcher.sif container.def
 srun -p ampere --gpus=1 apptainer run ../../apptainer/deepmatcher.sif ../../datasets/d2_abt_buy/ ../../output/deepmatcher/ --embeddings=../../embeddings/
 
 # to verify efficiency

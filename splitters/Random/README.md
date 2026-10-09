@@ -24,7 +24,7 @@ The produced output will include the following files:
 
 ```bash
 mkdir -p ../../apptainer ../../output
-apptainer build ../../apptainer/splitter_random.sif container.def
+APPTAINER_HOME="" apptainer build ../../apptainer/splitter_random.sif container.def
 srun --gpus=0 -p ampere apptainer run ../../apptainer/splitter_random.sif ../../datasets/d2_abt_buy/ ../../output/split_radom/
 
 # dev mode with bind

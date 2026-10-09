@@ -35,7 +35,7 @@ docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/outpu
 
 ```bash
 mkdir -p ../../apptainer ../../output/zeroer
-apptainer build ../../apptainer/zeroer.sif container.def
+APPTAINER_HOME="" apptainer build ../../apptainer/zeroer.sif container.def
 srun -p ampere apptainer run ../../apptainer/zeroer.sif ../../datasets/d2_abt_buy/ ../../output/zeroer/
 
 # dev mode with bind

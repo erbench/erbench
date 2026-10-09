@@ -25,7 +25,7 @@ docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/outpu
 
 ```bash
 mkdir -p ../../apptainer ../../output/ditto
-apptainer build ../../apptainer/ditto.sif container.def
+APPTAINER_HOME="" apptainer build ../../apptainer/ditto.sif container.def
 srun -p ampere --gpus=1 apptainer run ../../apptainer/ditto.sif ../../datasets/d2_abt_buy/ ../../output/ditto/
 
 # dev mode with bind

@@ -23,8 +23,7 @@ From: pytorch/pytorch:1.9.1-cuda11.1-cudnn8-runtime
     cd /srv
     pip install --no-cache-dir -r requirements.txt
     python -m spacy download en_core_web_lg
-    python -m nltk.downloader stopwords
-    mv /root/nltk_data /opt/conda/lib/nltk_data
+    python -m nltk.downloader -d /usr/local/share/nltk_data stopwords
 
 %environment
     export PYTHONPATH="${PYTHONPATH}:/srv/fork-ditto"

@@ -39,7 +39,7 @@ docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/outpu
 
 ```bash
 mkdir -p ../../apptainer ../../output
-apptainer build ../../apptainer/splitter_deepblocker.sif container.def
+APPTAINER_HOME="" apptainer build ../../apptainer/splitter_deepblocker.sif container.def
 srun --gpus=1 -p ampere apptainer run ../../apptainer/splitter_deepblocker.sif ../../datasets/d2_abt_buy/ ../../output/split_deepblocker/ --embeddings=../../embeddings/
 
 # dev mode with bind

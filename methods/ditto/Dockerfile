@@ -9,8 +9,7 @@ WORKDIR /workspace
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 RUN python -m spacy download en_core_web_lg
-RUN python -m nltk.downloader stopwords
-RUN mv /root/nltk_data /opt/conda/lib/nltk_data
+RUN python -m nltk.downloader -d /usr/local/share/nltk_data stopwords
 
 COPY fork-ditto .
 COPY *.py .

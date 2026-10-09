@@ -23,7 +23,7 @@ docker run -v ../../datasets/d2_abt_buy:/data/input:ro -v ../../test:/data/outpu
 
 ```bash
 mkdir -p ../../apptainer ../../output/gnem
-apptainer build ../../apptainer/gnem.sif container.def
+APPTAINER_HOME="" apptainer build ../../apptainer/gnem.sif container.def
 srun -p ampere --gpus=1 apptainer run ../../apptainer/gnem.sif ../../datasets/d2_abt_buy/ ../../output/gnem/
 
 # to verify efficiency

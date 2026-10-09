@@ -22,6 +22,7 @@ From: pytorch/pytorch:1.10.0-cuda11.3-cudnn8-runtime
 
     cd /srv
     pip install --no-cache-dir -r requirements.txt
+    python -m nltk.downloader -d /usr/local/share/nltk_data perluniprops nonbreaking_prefixes punkt
 
 %environment
     export PYTHONPATH="${PYTHONPATH}:/srv/fork-deepmatcher"
